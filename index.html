@@ -1739,7 +1739,7 @@ const supabaseClient = window.supabase.createClient(
     */
 
 
-    const products = [
+    let products = [];
 
       {
         name: "GoSriKi Women’s Printed Kurta Set – 3-Piece Kurta, Pant & Dupatta",
@@ -2907,6 +2907,350 @@ function closeAdmin() {
 
 if (window.location.hash === "#admin") {
   openAdmin();
+}
+</script>
+
+<script>
+/* ==========================================================
+   QEVRI PRODUCT MANAGEMENT
+   ========================================================== */
+
+async function saveProduct() {
+
+  const message = document.getElementById("productMessage");
+  message.textContent = "Saving product...";
+
+  const productId =
+    document.getElementById("editProductId").value;
+
+  const imageFile =
+    document.getElementById("productImage").files[0];
+
+  let imageUrl = "";
+
+  /* Upload image if selected */
+  if (imageFile) {
+
+    const safeName =
+      imageFile.name.replace(/[^a-zA-Z0-9.-]/g, "-");
+
+    const filePath =
+      "products/" + Date.now() + "-" + safeName;
+
+    const { error: uploadError } =
+      await supabaseClient
+        .storage
+        .from("product-images")
+        .upload(filePath, imageFile);
+
+    if (uploadError) {
+      message.textContent =
+        "Image upload failed: " + uploadError.message;
+      return;
+    }
+
+    const { data: imageData } =
+      supabaseClient
+        .storage
+        .from("product-images")
+        .getPublicUrl(filePath);
+
+    imageUrl = imageData.publicUrl;
+  }
+
+  const productData = {
+
+    name:
+      document.getElementById("productName").value.trim(),
+
+    description:
+      document.getElementById("productDescription").value.trim(),
+
+    retailer:
+      document.getElementById("productRetailer").value.trim(),
+
+    category:
+      document.getElementById("productCategory").value.trim(),
+
+    price:
+      Number(document.getElementById("productPrice").value) || null,
+
+    old_price:
+      Number(document.getElementById("productOldPrice").value) || null,
+
+    rating:
+      Number(document.getElementById("productRating").value) || null,
+
+    review_count:
+      Number(document.getElementById("productReviewCount").value) || 0,
+
+    product_url:
+      document.getElementById("productURL").value.trim(),
+
+    affiliate_url:
+      document.getElementById("productAffiliateURL").value.trim() || null,
+
+    is_deal:
+      document.getElementById("productDeal").checked,
+
+    is_trending:
+      document.getElementById("productTrending").checked,
+
+    is_featured:
+      document.getElementById("productFeatured").checked,
+
+    is_published:
+      document.getElementById("productPublished").checked,
+
+    updated_at:
+      new Date().toISOString()
+  };
+
+  /* Only add image URL when a new image was uploaded */
+  if (imageUrl) {
+    productData.image_url = imageUrl;
+  }
+
+  let result;
+
+  if (productId) {
+
+    result =
+      await supabaseClient
+        .from("products")
+        .update(productData)
+        .eq("id", productId);
+
+  } else {
+
+    result =
+      await supabaseClient
+        .from("products")
+        .insert([productData]);
+  }
+
+  if (result.error) {
+
+    message.textContent =
+      "Could not save product: " + result.error.message;
+
+    return;
+  }
+
+  message.textContent =
+    "Product saved successfully! ✓";
+
+  clearProductForm();
+
+  loadAdminProducts();
+
+  setTimeout(() => {
+    message.textContent = "";
+  }, 2500);
+}
+
+
+function showAddProduct() {
+
+  clearProductForm();
+
+  document.getElementById("productForm").style.display = "block";
+}
+
+
+function cancelProductForm() {
+
+  clearProductForm();
+
+  document.getElementById("productForm").style.display = "none";
+}
+
+
+function clearProductForm() {
+
+  document.getElementById("editProductId").value = "";
+
+  document.getElementById("productName").value = "";
+
+  document.getElementById("productDescription").value = "";
+
+  document.getElementById("productRetailer").value = "";
+
+  document.getElementById("productCategory").value = "";
+
+  document.getElementById("productPrice").value = "";
+
+  document.getElementById("productOldPrice").value = "";
+
+  document.getElementById("productRating").value = "";
+
+  document.getElementById("productReviewCount").value = "";
+
+  document.getElementById("productURL").value = "";
+
+  document.getElementById("productAffiliateURL").value = "";
+
+  document.getElementById("productImage").value = "";
+
+  document.getElementById("productDeal").checked = false;
+
+  document.getElementById("productTrending").checked = false;
+
+  document.getElementById("productFeatured").checked = false;
+
+  document.getElementById("productPublished").checked = true;
+}
+
+
+async function loadAdminProducts() {
+
+  const container =
+    document.getElementById("adminProducts");
+
+  container.innerHTML = "Loading products...";
+
+  const { data, error } =
+    await supabaseClient
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+  if (error) {
+
+    container.innerHTML =
+      "Could not load products: " + error.message;
+
+    return;
+  }
+
+  if (!data || data.length === 0) {
+
+    container.innerHTML =
+      "<p>No products added yet.</p>";
+
+    return;
+  }
+
+  container.innerHTML = data.map(product => `
+
+    <div style="
+      border:1px solid #ddd;
+      padding:15px;
+      margin:10px 0;
+      border-radius:12px;
+    ">
+
+      <strong>${product.name}</strong>
+
+      <br>
+
+      <small>
+        ${product.retailer || ""} ·
+        ₹${product.price || 0}
+      </small>
+
+      <br><br>
+
+      <button onclick="editProduct(${product.id})">
+        Edit
+      </button>
+
+      <button onclick="deleteProduct(${product.id})">
+        Delete
+      </button>
+
+    </div>
+
+  `).join("");
+}
+
+
+async function editProduct(id) {
+
+  const { data, error } =
+    await supabaseClient
+      .from("products")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+  if (error) {
+
+    alert("Could not load product.");
+
+    return;
+  }
+
+  document.getElementById("editProductId").value =
+    data.id;
+
+  document.getElementById("productName").value =
+    data.name || "";
+
+  document.getElementById("productDescription").value =
+    data.description || "";
+
+  document.getElementById("productRetailer").value =
+    data.retailer || "";
+
+  document.getElementById("productCategory").value =
+    data.category || "";
+
+  document.getElementById("productPrice").value =
+    data.price || "";
+
+  document.getElementById("productOldPrice").value =
+    data.old_price || "";
+
+  document.getElementById("productRating").value =
+    data.rating || "";
+
+  document.getElementById("productReviewCount").value =
+    data.review_count || "";
+
+  document.getElementById("productURL").value =
+    data.product_url || "";
+
+  document.getElementById("productAffiliateURL").value =
+    data.affiliate_url || "";
+
+  document.getElementById("productDeal").checked =
+    data.is_deal;
+
+  document.getElementById("productTrending").checked =
+    data.is_trending;
+
+  document.getElementById("productFeatured").checked =
+    data.is_featured;
+
+  document.getElementById("productPublished").checked =
+    data.is_published;
+
+  document.getElementById("productForm").style.display =
+    "block";
+}
+
+
+async function deleteProduct(id) {
+
+  if (!confirm("Delete this product?")) {
+    return;
+  }
+
+  const { error } =
+    await supabaseClient
+      .from("products")
+      .delete()
+      .eq("id", id);
+
+  if (error) {
+
+    alert("Could not delete product: " + error.message);
+
+    return;
+  }
+
+  loadAdminProducts();
 }
 </script>
   
