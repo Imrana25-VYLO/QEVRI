@@ -2800,6 +2800,113 @@ const supabaseClient = window.supabase.createClient(
 
   </script>
 
+<script>
+/* ==========================================================
+   QEVRI ADMIN LOGIN
+   ========================================================== */
+
+const QEVRI_ADMIN_UID = "9d00662a-c5d1-447a-b407-4ecc116a90b1";
+
+async function adminLogin() {
+
+  const email =
+    document.getElementById("adminEmail").value.trim();
+
+  const password =
+    document.getElementById("adminPassword").value;
+
+  const message =
+    document.getElementById("loginMessage");
+
+  if (!email || !password) {
+    message.textContent = "Please enter your email and password.";
+    return;
+  }
+
+  message.textContent = "Logging in...";
+
+  const { data, error } =
+    await supabaseClient.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
+
+  if (error) {
+    message.textContent = error.message;
+    return;
+  }
+
+  if (!data.user || data.user.id !== QEVRI_ADMIN_UID) {
+
+    await supabaseClient.auth.signOut();
+
+    message.textContent =
+      "This account is not authorized as a QEVRI admin.";
+
+    return;
+  }
+
+  document.getElementById("adminLogin").style.display = "none";
+
+  document.getElementById("adminDashboard").style.display = "block";
+
+  message.textContent = "";
+
+  loadAdminProducts();
+}
+
+
+async function checkAdminSession() {
+
+  const { data } =
+    await supabaseClient.auth.getSession();
+
+  const session = data.session;
+
+  if (
+    session &&
+    session.user &&
+    session.user.id === QEVRI_ADMIN_UID
+  ) {
+
+    document.getElementById("adminLogin").style.display = "none";
+
+    document.getElementById("adminDashboard").style.display = "block";
+
+    loadAdminProducts();
+
+  }
+}
+
+
+async function adminLogout() {
+
+  await supabaseClient.auth.signOut();
+
+  document.getElementById("adminDashboard").style.display = "none";
+
+  document.getElementById("adminLogin").style.display = "block";
+
+  document.getElementById("adminEmail").value = "";
+
+  document.getElementById("adminPassword").value = "";
+}
+
+
+function openAdmin() {
+
+  document.getElementById("adminPanel").style.display = "block";
+
+  checkAdminSession();
+}
+
+
+function closeAdmin() {
+
+  document.getElementById("adminPanel").style.display = "none";
+}
+</script>
+  
   <!-- QEVRI ADMIN PANEL -->
 <div id="adminPanel" style="display:none;">
   <div class="admin-overlay">
