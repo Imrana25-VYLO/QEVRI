@@ -2800,6 +2800,149 @@ const supabaseClient = window.supabase.createClient(
 
   </script>
 
+  <!-- QEVRI ADMIN PANEL -->
+<div id="adminPanel" style="display:none;">
+  <div class="admin-overlay">
+    <div class="admin-box">
+
+      <div class="admin-header">
+        <div>
+          <h2>QEVRI Admin</h2>
+          <p>Manage your products</p>
+        </div>
+        <button onclick="closeAdmin()">✕</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="adminLogin">
+        <h3>Admin Login</h3>
+
+        <input
+          type="email"
+          id="adminEmail"
+          placeholder="Admin email"
+        >
+
+        <input
+          type="password"
+          id="adminPassword"
+          placeholder="Password"
+        >
+
+        <button onclick="adminLogin()">Login</button>
+
+        <p id="loginMessage"></p>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div id="adminDashboard" style="display:none;">
+
+        <div class="admin-actions">
+          <button onclick="showAddProduct()">＋ Add Product</button>
+          <button onclick="adminLogout()">Logout</button>
+        </div>
+
+        <div id="productForm" style="display:none;">
+
+          <h3>Add / Edit Product</h3>
+
+          <input type="hidden" id="editProductId">
+
+          <input id="productName" placeholder="Product name">
+
+          <textarea
+            id="productDescription"
+            placeholder="Product description"
+          ></textarea>
+
+          <input id="productRetailer" placeholder="Retailer">
+
+          <input id="productCategory" placeholder="Category">
+
+          <input
+            id="productPrice"
+            type="number"
+            placeholder="Price"
+          >
+
+          <input
+            id="productOldPrice"
+            type="number"
+            placeholder="Old price"
+          >
+
+          <input
+            id="productRating"
+            type="number"
+            step="0.1"
+            placeholder="Rating"
+          >
+
+          <input
+            id="productReviewCount"
+            type="number"
+            placeholder="Review count"
+          >
+
+          <input
+            id="productURL"
+            placeholder="Product URL"
+          >
+
+          <input
+            id="productAffiliateURL"
+            placeholder="Affiliate URL (optional)"
+          >
+
+          <label>Product Image</label>
+
+          <input
+            id="productImage"
+            type="file"
+            accept="image/*"
+          >
+
+          <label>
+            <input type="checkbox" id="productDeal">
+            Deal
+          </label>
+
+          <label>
+            <input type="checkbox" id="productTrending">
+            Trending
+          </label>
+
+          <label>
+            <input type="checkbox" id="productFeatured">
+            Featured
+          </label>
+
+          <label>
+            <input type="checkbox" id="productPublished" checked>
+            Published
+          </label>
+
+          <div class="form-buttons">
+            <button onclick="saveProduct()">Save Product</button>
+            <button onclick="cancelProductForm()">Cancel</button>
+          </div>
+
+          <p id="productMessage"></p>
+
+        </div>
+
+        <h3>Your Products</h3>
+
+        <div id="adminProducts">
+          Loading products...
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+  
 </body>
 
 </html>
