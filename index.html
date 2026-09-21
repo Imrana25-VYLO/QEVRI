@@ -2900,10 +2900,13 @@ function openAdmin() {
   checkAdminSession();
 }
 
-
 function closeAdmin() {
 
   document.getElementById("adminPanel").style.display = "none";
+}
+
+if (window.location.hash === "#admin") {
+  openAdmin();
 }
 </script>
   
