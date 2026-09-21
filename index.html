@@ -793,6 +793,9 @@
     }
 
   </style>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
 </head>
 
 
@@ -1700,7 +1703,14 @@
   ========================== -->
 
   <script>
+    const SUPABASE_URL = "https://thijdkyjgzxnwwdzdyil.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_rTNzWNRC8zmx8J7KSJXviQ_1GgmmXQ6";
 
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+    
     /*
     ==========================================================
     QEVRI PRODUCT DATABASE
@@ -1732,21 +1742,21 @@
     const products = [
 
       {
-        name: "Everyday Cotton Kurti",
+        name: "GoSriKi Women’s Printed Kurta Set – 3-Piece Kurta, Pant & Dupatta",
 
         retailer: "Amazon",
 
-        url: "#",
+        url: "https://amzn.in/d/00mmeWxW",
 
         affiliateUrl: "",
 
         category: "Fashion",
 
-        price: 899,
+        price: 699,
 
-        oldPrice: 1499,
+        oldPrice: 2599,
 
-        rating: "★★★★☆ 4.4",
+        rating: "★★★★☆ 4.0",
 
         emoji: "👗",
 
