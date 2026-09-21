@@ -1,2588 +1,1133 @@
-<!DOCTYPE html>
-<html lang="en">
+<script>
+/* ==========================================================
+   QEVRI SUPABASE CONNECTION
+   ========================================================== */
 
-<head>
-  <meta charset="UTF-8">
+const SUPABASE_URL =
+  "https://thijdkyjgzxnwwdzdyil.supabase.co";
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+const SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_rTNzWNRC8zmx8J7KSJXviQ_1GgmmXQ6";
 
-  <title>QEVRI — Discover. Compare. Choose.</title>
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
 
-  <meta
-    name="description"
-    content="QEVRI helps you discover, compare and choose products worth buying from stores across the web."
-  >
 
-  <style>
+/* ==========================================================
+   QEVRI PRODUCT DATABASE
+   ========================================================== */
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+let products = [];
 
-    :root {
-      --cream: #fffaf5;
-      --white: #ffffff;
-      --dark: #20202a;
-      --muted: #777581;
-      --lavender: #c9b8e8;
-      --lavender-light: #eee8f8;
-      --blush: #f4d7dc;
-      --peach: #f5d6bd;
-      --border: #ece7e2;
-      --purple: #8068b7;
-      --pink: #d68caf;
-      --shadow: 0 12px 35px rgba(45, 37, 56, 0.08);
-      --radius: 22px;
-    }
 
-    html {
-      scroll-behavior: smooth;
-    }
+/* ==========================================================
+   LOAD PRODUCTS FROM SUPABASE
+   ========================================================== */
 
-    body {
-      font-family: Arial, Helvetica, sans-serif;
-      background: var(--cream);
-      color: var(--dark);
-      line-height: 1.5;
-      overflow-x: hidden;
-    }
+async function loadProductsFromSupabase() {
 
-    button,
-    input,
-    select {
-      font: inherit;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
-
-    /* =========================
-       BACKGROUND DECORATION
-    ========================= */
-
-    .decor {
-      position: fixed;
-      pointer-events: none;
-      z-index: -1;
-      opacity: 0.45;
-    }
-
-    .decor.one {
-      width: 260px;
-      height: 260px;
-      border: 1px solid var(--lavender);
-      border-radius: 50%;
-      top: 80px;
-      left: -140px;
-    }
-
-    .decor.two {
-      width: 340px;
-      height: 340px;
-      border: 1px solid var(--peach);
-      border-radius: 50%;
-      right: -190px;
-      top: 420px;
-    }
-
-    .decor.three {
-      width: 200px;
-      height: 200px;
-      border: 1px solid var(--blush);
-      border-radius: 50%;
-      left: 30%;
-      top: 900px;
-    }
-
-    /* =========================
-       HEADER
-    ========================= */
-
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(255, 250, 245, 0.94);
-      backdrop-filter: blur(15px);
-      border-bottom: 1px solid rgba(236, 231, 226, 0.8);
-    }
-
-    .nav {
-      max-width: 1250px;
-      margin: auto;
-      padding: 18px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-    }
-
-    .logo {
-      font-size: 31px;
-      font-weight: 800;
-      letter-spacing: 5px;
-      display: flex;
-      align-items: center;
-      white-space: nowrap;
-    }
-
-    .logo .q {
-      background: linear-gradient(
-        135deg,
-        #7162c7,
-        #d68caf,
-        #e7a26f
-      );
-
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 25px;
-      align-items: center;
-      font-size: 14px;
-      color: #44414b;
-    }
-
-    .nav-links a:hover {
-      color: var(--purple);
-    }
-
-    .nav-actions {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .icon-btn {
-      width: 40px;
-      height: 40px;
-      border: 1px solid var(--border);
-      background: white;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-size: 17px;
-      transition: 0.2s;
-    }
-
-    .icon-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow);
-    }
-
-    /* =========================
-       HERO
-    ========================= */
-
-    .hero {
-      max-width: 1250px;
-      margin: auto;
-      padding: 95px 24px 70px;
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 60px;
-      align-items: center;
-    }
-
-    .eyebrow {
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      font-size: 11px;
-      color: #887b98;
-      margin-bottom: 18px;
-    }
-
-    .hero h1 {
-      font-family: Georgia, serif;
-      font-size: clamp(45px, 6vw, 78px);
-      font-weight: 500;
-      line-height: 1.02;
-      max-width: 700px;
-    }
-
-    .hero h1 span {
-      font-style: italic;
-      background: linear-gradient(
-        90deg,
-        #7666c4,
-        #ca8fae,
-        #d99c73
-      );
-
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .hero p {
-      margin: 25px 0;
-      color: var(--muted);
-      max-width: 560px;
-      font-size: 17px;
-    }
-
-    .hero-buttons {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      border: none;
-      padding: 14px 22px;
-      border-radius: 30px;
-      font-weight: 600;
-      transition: 0.25s;
-    }
-
-    .btn-primary {
-      background: var(--dark);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow);
-    }
-
-    .btn-secondary {
-      background: white;
-      border: 1px solid var(--border);
-    }
-
-    .btn-secondary:hover {
-      border-color: var(--lavender);
-    }
-
-    .hero-art {
-      min-height: 410px;
-      border-radius: 40px;
-
-      background:
-        radial-gradient(
-          circle at 30% 30%,
-          rgba(201,184,232,.5),
-          transparent 35%
-        ),
-        radial-gradient(
-          circle at 70% 70%,
-          rgba(244,215,220,.55),
-          transparent 35%
-        ),
-        #fff;
-
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      display: grid;
-      place-items: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero-art::before {
-      content: "";
-      position: absolute;
-      width: 270px;
-      height: 270px;
-      border: 1px solid #d7c9eb;
-      border-radius: 50%;
-    }
-
-    .hero-art::after {
-      content: "✦";
-      position: absolute;
-      font-size: 28px;
-      color: #bca9dc;
-      top: 55px;
-      right: 70px;
-    }
-
-    .hero-logo {
-      font-size: 76px;
-      font-weight: 800;
-      letter-spacing: 13px;
-      z-index: 2;
-    }
-
-    /* =========================
-       SECTIONS
-    ========================= */
-
-    section {
-      max-width: 1250px;
-      margin: auto;
-      padding: 65px 24px;
-    }
-
-    .section-heading {
-      display: flex;
-      justify-content: space-between;
-      align-items: end;
-      margin-bottom: 28px;
-      gap: 20px;
-    }
-
-    .section-heading h2 {
-      font-family: Georgia, serif;
-      font-size: 37px;
-      font-weight: 500;
-    }
-
-    .section-heading p {
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    /* =========================
-       SEARCH
-    ========================= */
-
-    .search-wrap {
-      max-width: 700px;
-      margin: 0 auto;
-      position: relative;
-    }
-
-    .search-box {
-      width: 100%;
-      padding: 18px 22px 18px 52px;
-      border: 1px solid var(--border);
-      border-radius: 40px;
-      background: white;
-      outline: none;
-      font-size: 15px;
-      box-shadow: 0 5px 20px rgba(40,30,50,.04);
-    }
-
-    .search-box:focus {
-      border-color: var(--lavender);
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 20px;
-      top: 16px;
-      font-size: 19px;
-    }
-
-    /* =========================
-       CATEGORIES
-    ========================= */
-
-    .categories {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 14px;
-    }
-
-    .category {
-      padding: 25px 12px;
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      text-align: center;
-      transition: 0.25s;
-    }
-
-    .category:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow);
-      border-color: var(--lavender);
-    }
-
-    .category-icon {
-      font-size: 27px;
-      margin-bottom: 9px;
-    }
-
-    .category span {
-      font-size: 13px;
-      font-weight: 600;
-    }
-
-    /* =========================
-       PRODUCTS
-    ========================= */
-
-    .products {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 20px;
-    }
-
-    .product {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      position: relative;
-      transition: 0.25s;
-    }
-
-    .product:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow);
-    }
-
-    .product-image {
-      height: 230px;
-      background: linear-gradient(
-        145deg,
-        #f0eaf7,
-        #f9eeee
-      );
-
-      display: grid;
-      place-items: center;
-      font-size: 75px;
-      position: relative;
-    }
-
-    .product-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .heart {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 36px;
-      height: 36px;
-      border: none;
-      border-radius: 50%;
-      background: rgba(255,255,255,.9);
-      font-size: 17px;
-      z-index: 2;
-    }
-
-    .heart.active {
-      color: #c86684;
-    }
-
-    .product-info {
-      padding: 18px;
-    }
-
-    .retailer {
-      color: #8b8390;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1.3px;
-    }
-
-    .product h3 {
-      font-size: 15px;
-      margin: 6px 0;
-    }
-
-    .rating {
-      font-size: 12px;
-      color: #a37b39;
-      margin-bottom: 9px;
-    }
-
-    .price-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .price {
-      font-weight: 700;
-    }
-
-    .old-price {
-      text-decoration: line-through;
-      color: #aaa;
-      font-size: 12px;
-    }
-
-    .product-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 14px;
-    }
-
-    .small-btn {
-      flex: 1;
-      padding: 9px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: white;
-      font-size: 11px;
-      font-weight: 600;
-    }
-
-    .small-btn.primary {
-      background: var(--dark);
-      color: white;
-      border-color: var(--dark);
-    }
-
-    /* =========================
-       FIND YOUR MATCH
-    ========================= */
-
-    .match {
-      background:
-        linear-gradient(
-          135deg,
-          rgba(238,232,248,.8),
-          rgba(255,245,240,.85)
-        );
-
-      border-radius: 35px;
-      padding: 55px;
-      text-align: center;
-      border: 1px solid #e7dfec;
-    }
-
-    .match h2 {
-      font-family: Georgia, serif;
-      font-size: 42px;
-      font-weight: 500;
-    }
-
-    .match p {
-      color: var(--muted);
-      max-width: 600px;
-      margin: 12px auto 25px;
-    }
-
-    /* =========================
-       MODAL
-    ========================= */
-
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(25,20,30,.5);
-      z-index: 500;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .modal.show {
-      display: flex;
-    }
-
-    .modal-content {
-      width: min(600px, 100%);
-      background: white;
-      border-radius: 28px;
-      padding: 30px;
-      position: relative;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .close {
-      position: absolute;
-      right: 18px;
-      top: 18px;
-      border: none;
-      background: #f5f3f2;
-      width: 35px;
-      height: 35px;
-      border-radius: 50%;
-    }
-
-    .step {
-      display: none;
-    }
-
-    .step.active {
-      display: block;
-    }
-
-    .step h3 {
-      font-family: Georgia, serif;
-      font-size: 30px;
-      font-weight: 500;
-      margin-bottom: 22px;
-    }
-
-    .options {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .option {
-      padding: 17px;
-      border: 1px solid var(--border);
-      background: white;
-      border-radius: 15px;
-      text-align: left;
-    }
-
-    .option:hover,
-    .option.selected {
-      border-color: #a994d0;
-      background: #f7f3fb;
-    }
-
-    .step-controls {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 25px;
-    }
-
-    /* =========================
-       FOOTER
-    ========================= */
-
-    footer {
-      background: #24232b;
-      color: white;
-      padding: 55px 24px;
-      margin-top: 50px;
-    }
-
-    .footer-inner {
-      max-width: 1250px;
-      margin: auto;
-      display: grid;
-      grid-template-columns: 1.4fr repeat(3, 1fr);
-      gap: 40px;
-    }
-
-    footer .logo {
-      margin-bottom: 15px;
-    }
-
-    footer p,
-    footer a {
-      color: #b9b7c0;
-      font-size: 13px;
-    }
-
-    footer h4 {
-      margin-bottom: 15px;
-    }
-
-    footer a {
-      display: block;
-      margin: 8px 0;
-    }
-
-    .copyright {
-      max-width: 1250px;
-      margin: 35px auto 0;
-      padding-top: 20px;
-      border-top: 1px solid #3c3a44;
-      color: #96939d;
-      font-size: 12px;
-    }
-
-    /* =========================
-       TOAST
-    ========================= */
-
-    .toast {
-      position: fixed;
-      bottom: 25px;
-      left: 50%;
-      transform: translate(-50%, 100px);
-      background: #24232b;
-      color: white;
-      padding: 13px 20px;
-      border-radius: 30px;
-      font-size: 13px;
-      transition: .3s;
-      z-index: 800;
-    }
-
-    .toast.show {
-      transform: translate(-50%, 0);
-    }
-
-    /* =========================
-       RESPONSIVE
-    ========================= */
-
-    @media(max-width: 1000px) {
-
-      .nav-links {
-        display: none;
-      }
-
-      .hero {
-        grid-template-columns: 1fr;
-      }
-
-      .categories {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      .products {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .footer-inner {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media(max-width: 600px) {
-
-      .nav {
-        padding: 14px 16px;
-      }
-
-      .logo {
-        font-size: 24px;
-      }
-
-      .hero {
-        padding: 60px 18px 40px;
-      }
-
-      section {
-        padding: 45px 18px;
-      }
-
-      .hero-art {
-        min-height: 280px;
-      }
-
-      .hero-logo {
-        font-size: 48px;
-      }
-
-      .categories {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .products {
-        grid-template-columns: 1fr;
-      }
-
-      .match {
-        padding: 35px 20px;
-      }
-
-      .match h2 {
-        font-size: 32px;
-      }
-
-      .options {
-        grid-template-columns: 1fr;
-      }
-
-      .footer-inner {
-        grid-template-columns: 1fr;
-      }
-    }
-
-  </style>
-  
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
-</head>
-
-
-<body>
-
-  <div class="decor one"></div>
-  <div class="decor two"></div>
-  <div class="decor three"></div>
-
-
-  <!-- =========================
-       HEADER
-  ========================== -->
-
-  <header>
-
-    <nav class="nav">
-
-      <a href="#home" class="logo">
-        <span class="q">Q</span>EVRI
-      </a>
-
-
-      <div class="nav-links">
-
-        <a href="#home">Home</a>
-
-        <a href="#discover">Discover</a>
-
-        <a href="#categories">Categories</a>
-
-        <a href="#trending">Trending</a>
-
-        <a href="#deals">Deals</a>
-
-        <a href="#about">About</a>
-
-      </div>
-
-
-      <div class="nav-actions">
-
-        <button
-          class="icon-btn"
-          onclick="focusSearch()"
-          title="Search"
-        >
-          ⌕
-        </button>
-
-        <button
-          class="icon-btn"
-          onclick="showWishlist()"
-          title="Wishlist"
-        >
-          ♡
-        </button>
-
-      </div>
-
-    </nav>
-
-  </header>
-
-
-  <!-- =========================
-       MAIN
-  ========================== -->
-
-  <main id="home">
-
-
-    <!-- HERO -->
-
-    <div class="hero">
-
-      <div>
-
-        <div class="eyebrow">
-          Discover · Compare · Choose
-        </div>
-
-
-        <h1>
-          Find what
-          <span>fits your world.</span>
-        </h1>
-
-
-        <p>
-          QEVRI helps you discover, compare and choose
-          products worth buying from stores across the web —
-          all in one place.
-        </p>
-
-
-        <div class="hero-buttons">
-
-          <a
-            href="#discover"
-            class="btn btn-primary"
-          >
-            Explore Products
-          </a>
-
-
-          <button
-            class="btn btn-secondary"
-            onclick="openMatch()"
-          >
-            Find Your Match
-          </button>
-
-        </div>
-
-      </div>
-
-
-      <div class="hero-art">
-
-        <div class="hero-logo">
-
-          <span class="q">Q</span>EVRI
-
-        </div>
-
-      </div>
-
-    </div>
-
-
-
-    <!-- SEARCH -->
-
-    <section id="discover">
-
-      <div class="search-wrap">
-
-        <span class="search-icon">
-          ⌕
-        </span>
-
-
-        <input
-          id="searchInput"
-          class="search-box"
-          type="text"
-          placeholder="Search products, brands, stores or categories..."
-          oninput="searchProducts()"
-        >
-
-      </div>
-
-    </section>
-
-
-
-    <!-- CATEGORIES -->
-
-    <section id="categories">
-
-      <div class="section-heading">
-
-        <div>
-
-          <p>EXPLORE</p>
-
-          <h2>
-            Shop by category
-          </h2>
-
-        </div>
-
-      </div>
-
-
-      <div class="categories">
-
-        <div
-          class="category"
-          onclick="filterCategory('Fashion')"
-        >
-
-          <div class="category-icon">
-            👗
-          </div>
-
-          <span>
-            Fashion
-          </span>
-
-        </div>
-
-
-        <div
-          class="category"
-          onclick="filterCategory('Beauty')"
-        >
-
-          <div class="category-icon">
-            ✨
-          </div>
-
-          <span>
-            Beauty
-          </span>
-
-        </div>
-
-
-        <div
-          class="category"
-          onclick="filterCategory('Electronics')"
-        >
-
-          <div class="category-icon">
-            🎧
-          </div>
-
-          <span>
-            Electronics
-          </span>
-
-        </div>
-
-
-        <div
-          class="category"
-          onclick="filterCategory('Home')"
-        >
-
-          <div class="category-icon">
-            🏠
-          </div>
-
-          <span>
-            Home & Living
-          </span>
-
-        </div>
-
-
-        <div
-          class="category"
-          onclick="filterCategory('Footwear')"
-        >
-
-          <div class="category-icon">
-            👟
-          </div>
-
-          <span>
-            Footwear
-          </span>
-
-        </div>
-
-
-        <div
-          class="category"
-          onclick="filterCategory('Accessories')"
-        >
-
-          <div class="category-icon">
-            👜
-          </div>
-
-          <span>
-            Accessories
-          </span>
-
-        </div>
-
-
-        <div
-          class="category"
-          onclick="filterCategory('Jewellery')"
-        >
-
-          <div class="category-icon">
-            💎
-          </div>
-
-          <span>
-            Jewellery
-          </span>
-
-        </div>
-
-
-        <div
-          class="category"
-          onclick="filterCategory('Fitness')"
-        >
-
-          <div class="category-icon">
-            🏃
-          </div>
-
-          <span>
-            Fitness
-          </span>
-
-        </div>
-
-
-        <div
-          class="category"
-          onclick="filterCategory('Lifestyle')"
-        >
-
-          <div class="category-icon">
-            🌿
-          </div>
-
-          <span>
-            Lifestyle
-          </span>
-
-        </div>
-
-
-        <div
-          class="category"
-          onclick="filterCategory('Kids')"
-        >
-
-          <div class="category-icon">
-            🧸
-          </div>
-
-          <span>
-            Kids
-          </span>
-
-        </div>
-
-
-        <div
-          class="category"
-          onclick="filterCategory('Bags')"
-        >
-
-          <div class="category-icon">
-            👜
-          </div>
-
-          <span>
-            Bags
-          </span>
-
-        </div>
-
-
-        <div
-          class="category"
-          onclick="filterCategory('Gifts')"
-        >
-
-          <div class="category-icon">
-            🎁
-          </div>
-
-          <span>
-            Gifts
-          </span>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-
-    <!-- TRENDING -->
-
-    <section id="trending">
-
-      <div class="section-heading">
-
-        <div>
-
-          <p>
-            CURATED FOR YOU
-          </p>
-
-          <h2>
-            Trending now
-          </h2>
-
-        </div>
-
-
-        <button
-          class="btn btn-secondary"
-          onclick="clearFilter()"
-        >
-          View all
-        </button>
-
-      </div>
-
-
-      <div
-        class="products"
-        id="productGrid"
-      ></div>
-
-    </section>
-
-
-
-    <!-- QEVRI MATCH -->
-
-    <section>
-
-      <div class="match">
-
-        <div class="eyebrow">
-          QEVRI MATCH
-        </div>
-
-
-        <h2>
-          Find your match.
-        </h2>
-
-
-        <p>
-          Tell QEVRI what you're looking for and discover
-          products that fit your style, budget and priorities.
-        </p>
-
-
-        <button
-          class="btn btn-primary"
-          onclick="openMatch()"
-        >
-          Start Finding
-        </button>
-
-      </div>
-
-    </section>
-
-
-
-    <!-- DEALS -->
-
-    <section id="deals">
-
-      <div class="section-heading">
-
-        <div>
-
-          <p>
-            VALUE PICKS
-          </p>
-
-          <h2>
-            Worth a look
-          </h2>
-
-        </div>
-
-      </div>
-
-
-      <div
-        class="products"
-        id="dealGrid"
-      ></div>
-
-    </section>
-
-
-  </main>
-
-
-
-  <!-- =========================
-       MATCH MODAL
-  ========================== -->
-
-  <div
-    class="modal"
-    id="matchModal"
-  >
-
-    <div class="modal-content">
-
-
-      <button
-        class="close"
-        onclick="closeMatch()"
-      >
-        ×
-      </button>
-
-
-
-      <!-- STEP 1 -->
-
-      <div
-        class="step active"
-        data-step="1"
-      >
-
-        <div class="eyebrow">
-          STEP 1 OF 5
-        </div>
-
-        <h3>
-          What are you shopping for?
-        </h3>
-
-
-        <div class="options">
-
-          <button
-            class="option"
-            onclick="selectOption(this)"
-          >
-            Fashion
-          </button>
-
-          <button
-            class="option"
-            onclick="selectOption(this)"
-          >
-            Beauty
-          </button>
-
-          <button
-            class="option"
-            onclick="selectOption(this)"
-          >
-            Electronics
-          </button>
-
-          <button
-            class="option"
-            onclick="selectOption(this)"
-          >
-            Home
-          </button>
-
-        </div>
-
-      </div>
-
-
-
-      <!-- STEP 2 -->
-
-      <div
-        class="step"
-        data-step="2"
-      >
-
-        <div class="eyebrow">
-          STEP 2 OF 5
-        </div>
-
-        <h3>
-          What's your style?
-        </h3>
-
-
-        <div class="options">
-
-          <button
-            class="option"
-            onclick="selectOption(this)"
-          >
-            Minimal
-          </button>
-
-          <button
-            class="option"
-            onclick="selectOption(this)"
-          >
-            Trendy
-          </button>
-
-          <button
-            class="option"
-            onclick="selectOption(this)"
-          >
-            Classic
-          </button>
-
-          <button
-            class="option"
-            onclick="selectOption(this)"
-          >
-            Casual
-          </button>
-
-        </div>
-
-      </div>
-
-
-
-      <!-- STEP 3 -->
-
-      <div
-        class="step"
-        data-step="3"
-      >
-
-        <div class="eyebrow">
-          STEP 3 OF 5
-        </div>
-
-        <h3>
-          What's your budget?
-        </h3>
-
-
-        <div class="options">
-
-          <button
-            class="option"
-            onclick="selectOption(this)"
-          >
-            Under ₹500
-          </button>
-
-          <button
-            class="option"
-            onclick="selectOption(this)"
-          >
-            ₹500 – ₹1,000
-          </button>
-
-          <button
-            class="option"
-            onclick="selectOption(this)"
-          >
-            ₹1,000 – ₹2,500
-          </button>
-
-          <button
-            class="option"
-            onclick="selectOption(this)"
-          >
-            ₹2,500+
-          </button>
-
-        </div>
-
-      </div>
-
-
-
-      <!-- STEP 4 -->
-
-      <div
-        class="step"
-        data-step="4"
-      >
-
-        <div class="eyebrow">
-          STEP 4 OF 5
-        </div>
-
-        <h3>
-          What matters most?
-        </h3>
-
-
-        <div class="options">
-
-          <button
-            class="option"
-            onclick="selectOption(this)"
-          >
-            Price
-          </button>
-
-          <button
-            class="option"
-            onclick="selectOption(this)"
-          >
-            Quality
-          </button>
-
-          <button
-            class="option"
-            onclick="selectOption(this)"
-          >
-            Style
-          </button>
-
-          <button
-            class="option"
-            onclick="selectOption(this)"
-          >
-            Reviews
-          </button>
-
-        </div>
-
-      </div>
-
-
-
-      <!-- STEP 5 -->
-
-      <div
-        class="step"
-        data-step="5"
-      >
-
-        <div class="eyebrow">
-          STEP 5 OF 5
-        </div>
-
-        <h3>
-          Your QEVRI match is ready.
-        </h3>
-
-
-        <p
-          style="
-            color:#777581;
-            margin-bottom:20px;
-          "
-        >
-          Based on your choices, QEVRI will recommend
-          products that fit your preferences.
-        </p>
-
-
-        <button
-          class="btn btn-primary"
-          onclick="
-            showToast(
-              'Your recommendations are coming soon ✨'
-            )
-          "
-        >
-          Show My Matches
-        </button>
-
-      </div>
-
-
-
-      <!-- CONTROLS -->
-
-      <div class="step-controls">
-
-        <button
-          id="prevBtn"
-          class="btn btn-secondary"
-          onclick="previousStep()"
-          style="display:none;"
-        >
-          Back
-        </button>
-
-
-        <button
-          id="nextBtn"
-          class="btn btn-primary"
-          onclick="nextStep()"
-        >
-          Continue
-        </button>
-
-      </div>
-
-    </div>
-
-  </div>
-
-
-
-  <!-- =========================
-       FOOTER
-  ========================== -->
-
-  <footer id="about">
-
-    <div class="footer-inner">
-
-
-      <div>
-
-        <div class="logo">
-
-          <span class="q">Q</span>EVRI
-
-        </div>
-
-
-        <p>
-          Discover. Compare. Choose.
-        </p>
-
-
-        <p style="margin-top:12px;">
-          Discover products from stores
-          across the web.
-        </p>
-
-      </div>
-
-
-      <div>
-
-        <h4>
-          Discover
-        </h4>
-
-        <a href="#trending">
-          Trending
-        </a>
-
-        <a href="#deals">
-          Deals
-        </a>
-
-        <a href="#categories">
-          Categories
-        </a>
-
-      </div>
-
-
-      <div>
-
-        <h4>
-          QEVRI
-        </h4>
-
-        <a href="#">
-          About
-        </a>
-
-        <a href="#">
-          Contact
-        </a>
-
-        <a href="#">
-          Privacy
-        </a>
-
-        <a href="#">
-          Affiliate Disclosure
-        </a>
-
-      </div>
-
-
-      <div>
-
-        <h4>
-          Stores
-        </h4>
-
-        <p>
-          Products from multiple
-          online retailers.
-        </p>
-
-        <p style="margin-top:10px;">
-          Amazon · Flipkart · Myntra
-          · AJIO · Meesho · Nykaa
-          · Croma · and more.
-        </p>
-
-      </div>
-
-
-    </div>
-
-
-    <div class="copyright">
-
-      © 2026 QEVRI.
-      Product discovery made simpler.
-
-    </div>
-
-  </footer>
-
-
-
-  <!-- TOAST -->
-
-  <div
-    class="toast"
-    id="toast"
-  ></div>
-
-
-
-  <!-- =========================
-       JAVASCRIPT
-  ========================== -->
-
-  <script>
-    const SUPABASE_URL = "https://thijdkyjgzxnwwdzdyil.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_rTNzWNRC8zmx8J7KSJXviQ_1GgmmXQ6";
-
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_PUBLISHABLE_KEY
-);
-    
-    /*
-    ==========================================================
-    QEVRI PRODUCT DATABASE
-
-    IMPORTANT:
-
-    QEVRI is NOT restricted to Amazon or any particular store.
-
-    For every product you add:
-
-    retailer = store name
-    url      = actual product page
-    affiliateUrl = optional affiliate tracking URL
-
-    Example:
-
-    retailer: "Nykaa",
-    url: "https://www.nykaa.com/actual-product"
-
-    OR
-
-    retailer: "Some Online Store",
-    url: "https://www.example.com/product"
-
-    ==========================================================
-    */
-
-
-    let products = [];
-
-    /*
-    ==========================================================
-    QEVRI STATE
-    ==========================================================
-    */
-
-    let wishlist = [];
-
-    let comparison = [];
-
-    let currentStep = 1;
-
-
-
-    /*
-    ==========================================================
-    ESCAPE HTML
-    ==========================================================
-    */
-
-    function escapeHtml(value) {
-
-      return String(value)
-
-        .replace(/&/g, "&amp;")
-
-        .replace(/</g, "&lt;")
-
-        .replace(/>/g, "&gt;")
-
-        .replace(/"/g, "&quot;")
-
-        .replace(/'/g, "&#039;");
-
-    }
-
-
-
-    /*
-    ==========================================================
-    PRODUCT CARD
-    ==========================================================
-    */
-
-    function createProductCard(product) {
-
-      const safeName =
-        escapeHtml(product.name);
-
-      const safeRetailer =
-        escapeHtml(product.retailer);
-
-      const safeRating =
-        escapeHtml(product.rating);
-
-      const image = product.image
-        ? `
-          <img
-            src="${escapeHtml(product.image)}"
-            alt="${safeName}"
-            loading="lazy"
-          >
-        `
-        : escapeHtml(product.emoji || "🛍️");
-
-
-      const targetUrl =
-        product.affiliateUrl ||
-        product.url ||
-        "#";
-
-
-      return `
-
-        <div class="product">
-
-          <div class="product-image">
-
-            ${image}
-
-
-            <button
-
-              class="heart
-              ${
-                wishlist.includes(product.name)
-                  ? "active"
-                  : ""
-              }"
-
-              onclick="
-                toggleWishlist(
-                  ${JSON.stringify(product.name)}
-                )
-              "
-
-              aria-label="Add to wishlist"
-
-            >
-
-              ${
-                wishlist.includes(product.name)
-                  ? "♥"
-                  : "♡"
-              }
-
-            </button>
-
-          </div>
-
-
-          <div class="product-info">
-
-
-            <div class="retailer">
-
-              ${safeRetailer}
-
-            </div>
-
-
-            <h3>
-
-              ${safeName}
-
-            </h3>
-
-
-            <div class="rating">
-
-              ${safeRating}
-
-            </div>
-
-
-            <div class="price-row">
-
-              <span class="price">
-
-                ₹${Number(
-                  product.price
-                ).toLocaleString("en-IN")}
-
-              </span>
-
-
-              <span class="old-price">
-
-                ₹${Number(
-                  product.oldPrice
-                ).toLocaleString("en-IN")}
-
-              </span>
-
-            </div>
-
-
-            <div class="product-actions">
-
-
-              <button
-
-                class="small-btn"
-
-                onclick="
-                  addCompare(
-                    ${JSON.stringify(product.name)}
-                  )
-                "
-
-              >
-
-                Compare
-
-              </button>
-
-
-              <button
-
-                class="small-btn primary"
-
-                onclick="
-                  visitRetailer(
-                    ${JSON.stringify(targetUrl)},
-                    ${JSON.stringify(product.retailer)}
-                  )
-                "
-
-              >
-
-                View at ${safeRetailer}
-
-              </button>
-
-
-            </div>
-
-
-          </div>
-
-        </div>
-
-      `;
-
-    }
-
-
-
-    /*
-    ==========================================================
-    RENDER PRODUCTS
-    ==========================================================
-    */
-
-    function renderProducts(list = products) {
-
-      const grid =
-        document.getElementById(
-          "productGrid"
-        );
-
-
-      if (!list.length) {
-
-        grid.innerHTML = `
-
-          <p
-            style="
-              grid-column:1/-1;
-              text-align:center;
-              color:#777;
-              padding:40px;
-            "
-          >
-            No products found.
-          </p>
-
-        `;
-
-        return;
-
-      }
-
-
-      grid.innerHTML =
-        list
-          .map(createProductCard)
-          .join("");
-
-    }
-
-
-
-    /*
-    ==========================================================
-    RENDER DEALS
-    ==========================================================
-    */
-
-    function renderDeals() {
-
-      const grid =
-        document.getElementById(
-          "dealGrid"
-        );
-
-
-      const deals =
-        products.filter(
-          product => product.deal
-        );
-
-
-      grid.innerHTML =
-        deals
-          .map(createProductCard)
-          .join("");
-
-    }
-
-
-
-    /*
-    ==========================================================
-    SEARCH
-    ==========================================================
-    */
-
-    function searchProducts() {
-
-      const query =
-        document
-          .getElementById("searchInput")
-          .value
-          .toLowerCase()
-          .trim();
-
-
-      if (!query) {
-
-        renderProducts(products);
-
-        return;
-
-      }
-
-
-      const results =
-        products.filter(product =>
-
-          product.name
-            .toLowerCase()
-            .includes(query)
-
-          ||
-
-          product.category
-            .toLowerCase()
-            .includes(query)
-
-          ||
-
-          product.retailer
-            .toLowerCase()
-            .includes(query)
-
-        );
-
-
-      renderProducts(results);
-
-    }
-
-
-
-    /*
-    ==========================================================
-    CATEGORY FILTER
-    ==========================================================
-    */
-
-    function filterCategory(category) {
-
-      const results =
-        products.filter(
-          product =>
-            product.category === category
-        );
-
-
-      document
-        .getElementById("trending")
-        .scrollIntoView({
-          behavior: "smooth"
-        });
-
-
-      renderProducts(results);
-
-    }
-
-
-
-    /*
-    ==========================================================
-    CLEAR FILTER
-    ==========================================================
-    */
-
-    function clearFilter() {
-
-      document
-        .getElementById("searchInput")
-        .value = "";
-
-
-      renderProducts(products);
-
-    }
-
-
-
-    /*
-    ==========================================================
-    SEARCH BUTTON
-    ==========================================================
-    */
-
-    function focusSearch() {
-
-      const search =
-        document.getElementById(
-          "searchInput"
-        );
-
-
-      search.focus();
-
-
-      window.scrollTo({
-
-        top: 400,
-
-        behavior: "smooth"
-
+  const { data, error } =
+    await supabaseClient
+      .from("products")
+      .select("*")
+      .eq("is_published", true)
+      .order("created_at", {
+        ascending: false
       });
 
-    }
+  if (error) {
+
+    console.error(
+      "Supabase products error:",
+      error
+    );
+
+    return;
+  }
+
+  products =
+    (data || []).map(product => ({
+
+      id:
+        product.id,
+
+      name:
+        product.name,
+
+      retailer:
+        product.retailer,
+
+      url:
+        product.product_url,
+
+      affiliateUrl:
+        product.affiliate_url || "",
+
+      category:
+        product.category,
+
+      price:
+        Number(product.price || 0),
+
+      oldPrice:
+        Number(product.old_price || 0),
+
+      rating:
+        product.rating
+          ? `★★★★★ ${product.rating}`
+          : "",
+
+      emoji:
+        "🛍️",
+
+      image:
+        product.image_url || "",
+
+      deal:
+        !!product.is_deal,
+
+      trending:
+        !!product.is_trending,
+
+      featured:
+        !!product.is_featured
+
+    }));
 
 
+  renderProducts();
 
-    /*
-    ==========================================================
-    WISHLIST
-    ==========================================================
-    */
+  renderDeals();
 
-    function toggleWishlist(name) {
-
-      if (
-        wishlist.includes(name)
-      ) {
-
-        wishlist =
-          wishlist.filter(
-            item => item !== name
-          );
+}
 
 
-        showToast(
-          "Removed from wishlist"
+/* ==========================================================
+   QEVRI STATE
+   ========================================================== */
+
+let wishlist = [];
+
+let comparison = [];
+
+let currentStep = 1;
+
+
+/* ==========================================================
+   ESCAPE HTML
+   ========================================================== */
+
+function escapeHtml(value) {
+
+  return String(value)
+
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+
+    .replace(
+      /</g,
+      "&lt;"
+    )
+
+    .replace(
+      />/g,
+      "&gt;"
+    )
+
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
+
+/* ==========================================================
+   PRODUCT CARD
+   ========================================================== */
+
+function createProductCard(product) {
+
+  const safeName =
+    escapeHtml(
+      product.name
+    );
+
+  const safeRetailer =
+    escapeHtml(
+      product.retailer
+    );
+
+  const safeRating =
+    escapeHtml(
+      product.rating || ""
+    );
+
+
+  const image =
+    product.image
+
+      ? `
+        <img
+          src="${escapeHtml(product.image)}"
+          alt="${safeName}"
+          loading="lazy"
+        >
+      `
+
+      : escapeHtml(
+          product.emoji || "🛍️"
         );
 
-      } else {
 
-        wishlist.push(name);
-
-
-        showToast(
-          "Added to wishlist ♥"
-        );
-
-      }
+  const targetUrl =
+    product.affiliateUrl ||
+    product.url ||
+    "#";
 
 
-      renderProducts();
+  return `
 
-      renderDeals();
+    <div class="product">
 
-    }
+      <div class="product-image">
 
-
-
-    function showWishlist() {
-
-      if (!wishlist.length) {
-
-        showToast(
-          "Your wishlist is empty"
-        );
-
-        return;
-
-      }
+        ${image}
 
 
-      showToast(
+        <button
 
-        wishlist.length +
-        " item" +
-        (
-          wishlist.length > 1
-            ? "s"
-            : ""
-        ) +
-        " in your wishlist ♥"
+          class="heart ${
+            wishlist.includes(product.name)
+              ? "active"
+              : ""
+          }"
 
+          onclick="
+            toggleWishlist(
+              ${JSON.stringify(product.name)}
+            )
+          "
+
+          aria-label="Add to wishlist"
+
+        >
+
+          ${
+            wishlist.includes(product.name)
+              ? "♥"
+              : "♡"
+          }
+
+        </button>
+
+      </div>
+
+
+      <div class="product-info">
+
+
+        <div class="retailer">
+
+          ${safeRetailer}
+
+        </div>
+
+
+        <h3>
+
+          ${safeName}
+
+        </h3>
+
+
+        <div class="rating">
+
+          ${safeRating}
+
+        </div>
+
+
+        <div class="price-row">
+
+          <span class="price">
+
+            ₹${Number(
+              product.price || 0
+            ).toLocaleString("en-IN")}
+
+          </span>
+
+
+          ${
+            product.oldPrice
+              ? `
+                <span class="old-price">
+
+                  ₹${Number(
+                    product.oldPrice
+                  ).toLocaleString("en-IN")}
+
+                </span>
+              `
+              : ""
+          }
+
+        </div>
+
+
+        <div class="product-actions">
+
+
+          <button
+
+            class="small-btn"
+
+            onclick="
+              addCompare(
+                ${JSON.stringify(product.name)}
+              )
+            "
+
+          >
+
+            Compare
+
+          </button>
+
+
+          <button
+
+            class="small-btn primary"
+
+            onclick="
+              visitRetailer(
+                ${JSON.stringify(targetUrl)},
+                ${JSON.stringify(product.retailer)}
+              )
+            "
+
+          >
+
+            View at ${safeRetailer}
+
+          </button>
+
+
+        </div>
+
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+/* ==========================================================
+   RENDER PRODUCTS
+   ========================================================== */
+
+function renderProducts(
+  list = products
+) {
+
+  const grid =
+    document.getElementById(
+      "productGrid"
+    );
+
+
+  if (!grid) {
+    return;
+  }
+
+
+  if (!list.length) {
+
+    grid.innerHTML = `
+
+      <p
+        style="
+          grid-column:1/-1;
+          text-align:center;
+          color:#777;
+          padding:40px;
+        "
+      >
+
+        No products found.
+
+      </p>
+
+    `;
+
+    return;
+
+  }
+
+
+  grid.innerHTML =
+    list
+      .map(
+        createProductCard
+      )
+      .join("");
+
+}
+
+
+/* ==========================================================
+   RENDER DEALS
+   ========================================================== */
+
+function renderDeals() {
+
+  const grid =
+    document.getElementById(
+      "dealGrid"
+    );
+
+
+  if (!grid) {
+    return;
+  }
+
+
+  const deals =
+    products.filter(
+      product =>
+        product.deal
+    );
+
+
+  if (!deals.length) {
+
+    grid.innerHTML = `
+
+      <p
+        style="
+          grid-column:1/-1;
+          text-align:center;
+          color:#777;
+          padding:40px;
+        "
+      >
+
+        No deals available yet.
+
+      </p>
+
+    `;
+
+    return;
+
+  }
+
+
+  grid.innerHTML =
+    deals
+      .map(
+        createProductCard
+      )
+      .join("");
+
+}
+
+
+/* ==========================================================
+   SEARCH
+   ========================================================== */
+
+function searchProducts() {
+
+  const input =
+    document.getElementById(
+      "searchInput"
+    );
+
+
+  if (!input) {
+    return;
+  }
+
+
+  const query =
+    input.value
+      .toLowerCase()
+      .trim();
+
+
+  if (!query) {
+
+    renderProducts(
+      products
+    );
+
+    return;
+
+  }
+
+
+  const results =
+    products.filter(
+      product =>
+
+        String(
+          product.name || ""
+        )
+        .toLowerCase()
+        .includes(query)
+
+        ||
+
+        String(
+          product.category || ""
+        )
+        .toLowerCase()
+        .includes(query)
+
+        ||
+
+        String(
+          product.retailer || ""
+        )
+        .toLowerCase()
+        .includes(query)
+    );
+
+
+  renderProducts(
+    results
+  );
+
+}
+
+
+/* ==========================================================
+   CATEGORY FILTER
+   ========================================================== */
+
+function filterCategory(
+  category
+) {
+
+  const results =
+    products.filter(
+      product =>
+        product.category === category
+    );
+
+
+  const trending =
+    document.getElementById(
+      "trending"
+    );
+
+
+  if (trending) {
+
+    trending.scrollIntoView({
+      behavior: "smooth"
+    });
+
+  }
+
+
+  renderProducts(
+    results
+  );
+
+}
+
+
+/* ==========================================================
+   CLEAR FILTER
+   ========================================================== */
+
+function clearFilter() {
+
+  const search =
+    document.getElementById(
+      "searchInput"
+    );
+
+
+  if (search) {
+
+    search.value = "";
+
+  }
+
+
+  renderProducts(
+    products
+  );
+
+}
+
+
+/* ==========================================================
+   SEARCH BUTTON
+   ========================================================== */
+
+function focusSearch() {
+
+  const search =
+    document.getElementById(
+      "searchInput"
+    );
+
+
+  if (!search) {
+    return;
+  }
+
+
+  search.focus();
+
+
+  window.scrollTo({
+
+    top: 400,
+
+    behavior: "smooth"
+
+  });
+
+}
+
+
+/* ==========================================================
+   WISHLIST
+   ========================================================== */
+
+function toggleWishlist(
+  name
+) {
+
+  if (
+    wishlist.includes(name)
+  ) {
+
+    wishlist =
+      wishlist.filter(
+        item =>
+          item !== name
       );
 
-    }
+
+    showToast(
+      "Removed from wishlist"
+    );
+
+  }
+
+  else {
+
+    wishlist.push(name);
 
 
+    showToast(
+      "Added to wishlist ♥"
+    );
 
-    /*
-    ==========================================================
-    COMPARE
-    ==========================================================
-    */
-
-    function addCompare(name) {
-
-      if (
-        !comparison.includes(name)
-      ) {
-
-        comparison.push(name);
+  }
 
 
-        if (
-          comparison.length > 4
-        ) {
+  renderProducts();
 
-          comparison.shift();
+  renderDeals();
 
-        }
+}
 
 
-        showToast(
-          name +
-          " added to comparison"
-        );
+function showWishlist() {
 
-      } else {
+  if (!wishlist.length) {
 
-        showToast(
-          "Already added to comparison"
-        );
+    showToast(
+      "Your wishlist is empty"
+    );
 
-      }
+    return;
 
-    }
+  }
 
 
+  showToast(
 
-    /*
-    ==========================================================
-    RETAILER LINK
-    ==========================================================
+    wishlist.length +
 
-    THIS IS THE IMPORTANT PART.
+    " item" +
 
-    QEVRI can send users to ANY retailer.
+    (
+      wishlist.length > 1
+        ? "s"
+        : ""
+    ) +
 
-    Amazon
-    Flipkart
-    Myntra
-    AJIO
-    Meesho
-    Nykaa
-    Croma
-    IKEA
-    Tata CLiQ
-    Small websites
-    Independent stores
-    ANY valid product URL
-    ==========================================================
-    */
+    " in your wishlist ♥"
 
-    function visitRetailer(
-      url,
-      retailer
+  );
+
+}
+
+
+/* ==========================================================
+   COMPARE
+   ========================================================== */
+
+function addCompare(
+  name
+) {
+
+  if (
+    !comparison.includes(name)
+  ) {
+
+    comparison.push(name);
+
+
+    if (
+      comparison.length > 4
     ) {
 
-      if (
-        !url ||
-        url === "#"
-      ) {
+      comparison.shift();
 
-        showToast(
-          "Product link is not available yet."
+    }
+
+
+    showToast(
+      name +
+      " added to comparison"
+    );
+
+  }
+
+  else {
+
+    showToast(
+      "Already added to comparison"
+    );
+
+  }
+
+}
+
+
+/* ==========================================================
+   RETAILER LINK
+   ========================================================== */
+
+function visitRetailer(
+  url,
+  retailer
+) {
+
+  if (
+    !url ||
+    url === "#"
+  ) {
+
+    showToast(
+      "Product link is not available yet."
+    );
+
+    return;
+
+  }
+
+
+  window.open(
+    url,
+    "_blank",
+    "noopener,noreferrer"
+  );
+
+}
+
+
+/* ==========================================================
+   QEVRI MATCH
+   ========================================================== */
+
+function openMatch() {
+
+  currentStep = 1;
+
+
+  const modal =
+    document.getElementById(
+      "matchModal"
+    );
+
+
+  if (!modal) {
+    return;
+  }
+
+
+  modal.classList.add(
+    "show"
+  );
+
+
+  updateSteps();
+
+}
+
+
+function closeMatch() {
+
+  const modal =
+    document.getElementById(
+      "matchModal"
+    );
+
+
+  if (modal) {
+
+    modal.classList.remove(
+      "show"
+    );
+
+  }
+
+}
+
+
+function selectOption(
+  button
+) {
+
+  const parent =
+    button.parentElement;
+
+
+  parent
+    .querySelectorAll(
+      ".option"
+    )
+    .forEach(
+      option => {
+
+        option.classList.remove(
+          "selected"
         );
 
-        return;
-
       }
+    );
 
 
-      window.open(
-        url,
-        "_blank",
-        "noopener,noreferrer"
-      );
+  button.classList.add(
+    "selected"
+  );
 
-    }
+}
 
 
+function updateSteps() {
 
-    /*
-    ==========================================================
-    QEVRI MATCH
-    ==========================================================
-    */
+  document
+    .querySelectorAll(
+      ".step"
+    )
+    .forEach(
+      step => {
 
-    function openMatch() {
+        step.classList.toggle(
 
-      currentStep = 1;
+          "active",
 
+          Number(
+            step.dataset.step
+          ) === currentStep
 
-      document
-        .getElementById(
-          "matchModal"
-        )
-        .classList.add("show");
-
-
-      updateSteps();
-
-    }
-
-
-
-    function closeMatch() {
-
-      document
-        .getElementById(
-          "matchModal"
-        )
-        .classList.remove("show");
-
-    }
-
-
-
-    function selectOption(button) {
-
-      const parent =
-        button.parentElement;
-
-
-      parent
-        .querySelectorAll(".option")
-        .forEach(option => {
-
-          option.classList.remove(
-            "selected"
-          );
-
-        });
-
-
-      button.classList.add(
-        "selected"
-      );
-
-    }
-
-
-
-    function updateSteps() {
-
-      document
-        .querySelectorAll(".step")
-        .forEach(step => {
-
-          step.classList.toggle(
-
-            "active",
-
-            Number(
-              step.dataset.step
-            ) === currentStep
-
-          );
-
-        });
-
-
-      document
-        .getElementById("prevBtn")
-        .style.display =
-          currentStep > 1
-            ? "block"
-            : "none";
-
-
-      document
-        .getElementById("nextBtn")
-        .style.display =
-          currentStep < 5
-            ? "block"
-            : "none";
-
-    }
-
-
-
-    function nextStep() {
-
-      if (
-        currentStep < 5
-      ) {
-
-        currentStep++;
-
-        updateSteps();
-
-      }
-
-    }
-
-
-
-    function previousStep() {
-
-      if (
-        currentStep > 1
-      ) {
-
-        currentStep--;
-
-        updateSteps();
-
-      }
-
-    }
-
-
-
-    /*
-    ==========================================================
-    TOAST
-    ==========================================================
-    */
-
-    function showToast(message) {
-
-      const toast =
-        document.getElementById(
-          "toast"
         );
 
+      }
+    );
 
-      toast.textContent =
-        message;
+
+  const prev =
+    document.getElementById(
+      "prevBtn"
+    );
 
 
-      toast.classList.add(
+  const next =
+    document.getElementById(
+      "nextBtn"
+    );
+
+
+  if (prev) {
+
+    prev.style.display =
+      currentStep > 1
+        ? "block"
+        : "none";
+
+  }
+
+
+  if (next) {
+
+    next.style.display =
+      currentStep < 5
+        ? "block"
+        : "none";
+
+  }
+
+}
+
+
+function nextStep() {
+
+  if (
+    currentStep < 5
+  ) {
+
+    currentStep++;
+
+    updateSteps();
+
+  }
+
+}
+
+
+function previousStep() {
+
+  if (
+    currentStep > 1
+  ) {
+
+    currentStep--;
+
+    updateSteps();
+
+  }
+
+}
+
+
+/* ==========================================================
+   TOAST
+   ========================================================== */
+
+function showToast(
+  message
+) {
+
+  const toast =
+    document.getElementById(
+      "toast"
+    );
+
+
+  if (!toast) {
+    return;
+  }
+
+
+  toast.textContent =
+    message;
+
+
+  toast.classList.add(
+    "show"
+  );
+
+
+  setTimeout(
+    () => {
+
+      toast.classList.remove(
         "show"
       );
 
+    },
+    2500
+  );
 
-      setTimeout(() => {
+}
 
-        toast.classList.remove(
-          "show"
-        );
 
-      }, 2500);
+/* ==========================================================
+   CLOSE MATCH MODAL
+   ========================================================== */
+
+const matchModal =
+  document.getElementById(
+    "matchModal"
+  );
+
+
+if (matchModal) {
+
+  matchModal.addEventListener(
+    "click",
+    function(event) {
+
+      if (
+        event.target === this
+      ) {
+
+        closeMatch();
+
+      }
 
     }
+  );
+
+}
 
 
+/* ==========================================================
+   INITIAL LOAD
+   ========================================================== */
 
-    /*
-    ==========================================================
-    CLOSE MODAL WHEN CLICKING OUTSIDE
-    ==========================================================
-    */
+loadProductsFromSupabase();
 
-    document
-      .getElementById("matchModal")
-      .addEventListener(
-        "click",
-        function(event) {
+</script>
 
-          if (
-            event.target === this
-          ) {
-
-            closeMatch();
-
-          }
-
-        }
-      );
-
-
-
-    /*
-    ==========================================================
-    INITIAL LOAD
-    ==========================================================
-    */
-
-    renderProducts();
-
-    renderDeals();
-
-  </script>
 
 <script>
 /* ==========================================================
    QEVRI ADMIN LOGIN
    ========================================================== */
 
-const QEVRI_ADMIN_UID = "9d00662a-c5d1-447a-b407-4ecc116a90b1";
+const QEVRI_ADMIN_UID =
+  "9d00662a-c5d1-447a-b407-4ecc116a90b1";
+
 
 async function adminLogin() {
 
   const email =
-    document.getElementById("adminEmail").value.trim();
+    document
+      .getElementById(
+        "adminEmail"
+      )
+      .value
+      .trim();
+
 
   const password =
-    document.getElementById("adminPassword").value;
+    document.getElementById(
+      "adminPassword"
+    ).value;
+
 
   const message =
-    document.getElementById("loginMessage");
+    document.getElementById(
+      "loginMessage"
+    );
 
-  if (!email || !password) {
-    message.textContent = "Please enter your email and password.";
+
+  if (
+    !email ||
+    !password
+  ) {
+
+    message.textContent =
+      "Please enter your email and password.";
+
     return;
+
   }
 
-  message.textContent = "Logging in...";
 
-  const { data, error } =
+  message.textContent =
+    "Logging in...";
+
+
+  const {
+    data,
+    error
+  } =
     await supabaseClient.auth.signInWithPassword({
-      email: email,
-      password: password
+
+      email:
+        email,
+
+      password:
+        password
+
     });
 
+
   if (error) {
-    message.textContent = error.message;
+
+    message.textContent =
+      error.message;
+
     return;
+
   }
 
-  if (!data.user || data.user.id !== QEVRI_ADMIN_UID) {
+
+  if (
+    !data.user ||
+    data.user.id !== QEVRI_ADMIN_UID
+  ) {
 
     await supabaseClient.auth.signOut();
+
 
     message.textContent =
       "This account is not authorized as a QEVRI admin.";
 
     return;
+
   }
 
-  document.getElementById("adminLogin").style.display = "none";
 
-  document.getElementById("adminDashboard").style.display = "block";
+  document.getElementById(
+    "adminLogin"
+  ).style.display =
+    "none";
+
+
+  document.getElementById(
+    "adminDashboard"
+  ).style.display =
+    "block";
+
 
   message.textContent = "";
 
+
   loadAdminProducts();
+
 }
 
 
 async function checkAdminSession() {
 
-  const { data } =
+  const {
+    data
+  } =
     await supabaseClient.auth.getSession();
 
-  const session = data.session;
+
+  const session =
+    data.session;
+
 
   if (
     session &&
@@ -2590,13 +1135,22 @@ async function checkAdminSession() {
     session.user.id === QEVRI_ADMIN_UID
   ) {
 
-    document.getElementById("adminLogin").style.display = "none";
+    document.getElementById(
+      "adminLogin"
+    ).style.display =
+      "none";
 
-    document.getElementById("adminDashboard").style.display = "block";
+
+    document.getElementById(
+      "adminDashboard"
+    ).style.display =
+      "block";
+
 
     loadAdminProducts();
 
   }
+
 }
 
 
@@ -2604,32 +1158,64 @@ async function adminLogout() {
 
   await supabaseClient.auth.signOut();
 
-  document.getElementById("adminDashboard").style.display = "none";
 
-  document.getElementById("adminLogin").style.display = "block";
+  document.getElementById(
+    "adminDashboard"
+  ).style.display =
+    "none";
 
-  document.getElementById("adminEmail").value = "";
 
-  document.getElementById("adminPassword").value = "";
+  document.getElementById(
+    "adminLogin"
+  ).style.display =
+    "block";
+
+
+  document.getElementById(
+    "adminEmail"
+  ).value = "";
+
+
+  document.getElementById(
+    "adminPassword"
+  ).value = "";
+
 }
 
 
 function openAdmin() {
 
-  document.getElementById("adminPanel").style.display = "block";
+  document.getElementById(
+    "adminPanel"
+  ).style.display =
+    "block";
+
 
   checkAdminSession();
+
 }
+
 
 function closeAdmin() {
 
-  document.getElementById("adminPanel").style.display = "none";
+  document.getElementById(
+    "adminPanel"
+  ).style.display =
+    "none";
+
 }
 
-if (window.location.hash === "#admin") {
+
+if (
+  window.location.hash === "#admin"
+) {
+
   openAdmin();
+
 }
+
 </script>
+
 
 <script>
 /* ==========================================================
@@ -2638,486 +1224,722 @@ if (window.location.hash === "#admin") {
 
 async function saveProduct() {
 
-  const message = document.getElementById("productMessage");
-  message.textContent = "Saving product...";
+  const message =
+    document.getElementById(
+      "productMessage"
+    );
+
+
+  message.textContent =
+    "Saving product...";
+
 
   const productId =
-    document.getElementById("editProductId").value;
+    document.getElementById(
+      "editProductId"
+    ).value;
+
 
   const imageFile =
-    document.getElementById("productImage").files[0];
+    document.getElementById(
+      "productImage"
+    ).files[0];
+
 
   let imageUrl = "";
 
-  /* Upload image if selected */
+
+  /* ========================================================
+     UPLOAD IMAGE
+     ======================================================== */
+
   if (imageFile) {
 
     const safeName =
-      imageFile.name.replace(/[^a-zA-Z0-9.-]/g, "-");
+      imageFile.name.replace(
+        /[^a-zA-Z0-9.-]/g,
+        "-"
+      );
+
 
     const filePath =
-      "products/" + Date.now() + "-" + safeName;
+      "products/" +
+      Date.now() +
+      "-" +
+      safeName;
 
-    const { error: uploadError } =
+
+    const {
+      error: uploadError
+    } =
       await supabaseClient
         .storage
         .from("product-images")
-        .upload(filePath, imageFile);
+        .upload(
+          filePath,
+          imageFile
+        );
+
 
     if (uploadError) {
+
       message.textContent =
-        "Image upload failed: " + uploadError.message;
+        "Image upload failed: " +
+        uploadError.message;
+
       return;
+
     }
 
-    const { data: imageData } =
+
+    const {
+      data: imageData
+    } =
       supabaseClient
         .storage
         .from("product-images")
-        .getPublicUrl(filePath);
+        .getPublicUrl(
+          filePath
+        );
 
-    imageUrl = imageData.publicUrl;
+
+    imageUrl =
+      imageData.publicUrl;
+
   }
+
+
+  /* ========================================================
+     PRODUCT DATA
+     ======================================================== */
 
   const productData = {
 
     name:
-      document.getElementById("productName").value.trim(),
+      document
+        .getElementById(
+          "productName"
+        )
+        .value
+        .trim(),
+
 
     description:
-      document.getElementById("productDescription").value.trim(),
+      document
+        .getElementById(
+          "productDescription"
+        )
+        .value
+        .trim(),
+
 
     retailer:
-      document.getElementById("productRetailer").value.trim(),
+      document
+        .getElementById(
+          "productRetailer"
+        )
+        .value
+        .trim(),
+
 
     category:
-      document.getElementById("productCategory").value.trim(),
+      document
+        .getElementById(
+          "productCategory"
+        )
+        .value
+        .trim(),
+
 
     price:
-      Number(document.getElementById("productPrice").value) || null,
+      Number(
+        document
+          .getElementById(
+            "productPrice"
+          )
+          .value
+      ) || null,
+
 
     old_price:
-      Number(document.getElementById("productOldPrice").value) || null,
+      Number(
+        document
+          .getElementById(
+            "productOldPrice"
+          )
+          .value
+      ) || null,
+
 
     rating:
-      Number(document.getElementById("productRating").value) || null,
+      Number(
+        document
+          .getElementById(
+            "productRating"
+          )
+          .value
+      ) || null,
+
 
     review_count:
-      Number(document.getElementById("productReviewCount").value) || 0,
+      Number(
+        document
+          .getElementById(
+            "productReviewCount"
+          )
+          .value
+      ) || 0,
+
 
     product_url:
-      document.getElementById("productURL").value.trim(),
+      document
+        .getElementById(
+          "productURL"
+        )
+        .value
+        .trim(),
+
 
     affiliate_url:
-      document.getElementById("productAffiliateURL").value.trim() || null,
+      document
+        .getElementById(
+          "productAffiliateURL"
+        )
+        .value
+        .trim() || null,
+
 
     is_deal:
-      document.getElementById("productDeal").checked,
+      document.getElementById(
+        "productDeal"
+      ).checked,
+
 
     is_trending:
-      document.getElementById("productTrending").checked,
+      document.getElementById(
+        "productTrending"
+      ).checked,
+
 
     is_featured:
-      document.getElementById("productFeatured").checked,
+      document.getElementById(
+        "productFeatured"
+      ).checked,
+
 
     is_published:
-      document.getElementById("productPublished").checked,
+      document.getElementById(
+        "productPublished"
+      ).checked,
+
 
     updated_at:
       new Date().toISOString()
+
   };
 
-  /* Only add image URL when a new image was uploaded */
+
   if (imageUrl) {
-    productData.image_url = imageUrl;
+
+    productData.image_url =
+      imageUrl;
+
   }
 
+
+  /* ========================================================
+     INSERT OR UPDATE
+     ======================================================== */
+
   let result;
+
 
   if (productId) {
 
     result =
       await supabaseClient
         .from("products")
-        .update(productData)
-        .eq("id", productId);
+        .update(
+          productData
+        )
+        .eq(
+          "id",
+          productId
+        );
 
-  } else {
+  }
+
+  else {
 
     result =
       await supabaseClient
         .from("products")
-        .insert([productData]);
+        .insert([
+          productData
+        ]);
+
   }
+
 
   if (result.error) {
 
     message.textContent =
-      "Could not save product: " + result.error.message;
+      "Could not save product: " +
+      result.error.message;
 
     return;
+
   }
+
 
   message.textContent =
     "Product saved successfully! ✓";
 
+
   clearProductForm();
+
 
   loadAdminProducts();
 
-  setTimeout(() => {
-    message.textContent = "";
-  }, 2500);
+
+  /* Refresh public products */
+  loadProductsFromSupabase();
+
+
+  setTimeout(
+    () => {
+
+      message.textContent =
+        "";
+
+    },
+    2500
+  );
+
 }
 
+
+/* ==========================================================
+   SHOW ADD PRODUCT
+   ========================================================== */
 
 function showAddProduct() {
 
   clearProductForm();
 
-  document.getElementById("productForm").style.display = "block";
+
+  document.getElementById(
+    "productForm"
+  ).style.display =
+    "block";
+
 }
 
+
+/* ==========================================================
+   CANCEL PRODUCT FORM
+   ========================================================== */
 
 function cancelProductForm() {
 
   clearProductForm();
 
-  document.getElementById("productForm").style.display = "none";
+
+  document.getElementById(
+    "productForm"
+  ).style.display =
+    "none";
+
 }
 
+
+/* ==========================================================
+   CLEAR PRODUCT FORM
+   ========================================================== */
 
 function clearProductForm() {
 
-  document.getElementById("editProductId").value = "";
+  document.getElementById(
+    "editProductId"
+  ).value = "";
 
-  document.getElementById("productName").value = "";
 
-  document.getElementById("productDescription").value = "";
+  document.getElementById(
+    "productName"
+  ).value = "";
 
-  document.getElementById("productRetailer").value = "";
 
-  document.getElementById("productCategory").value = "";
+  document.getElementById(
+    "productDescription"
+  ).value = "";
 
-  document.getElementById("productPrice").value = "";
 
-  document.getElementById("productOldPrice").value = "";
+  document.getElementById(
+    "productRetailer"
+  ).value = "";
 
-  document.getElementById("productRating").value = "";
 
-  document.getElementById("productReviewCount").value = "";
+  document.getElementById(
+    "productCategory"
+  ).value = "";
 
-  document.getElementById("productURL").value = "";
 
-  document.getElementById("productAffiliateURL").value = "";
+  document.getElementById(
+    "productPrice"
+  ).value = "";
 
-  document.getElementById("productImage").value = "";
 
-  document.getElementById("productDeal").checked = false;
+  document.getElementById(
+    "productOldPrice"
+  ).value = "";
 
-  document.getElementById("productTrending").checked = false;
 
-  document.getElementById("productFeatured").checked = false;
+  document.getElementById(
+    "productRating"
+  ).value = "";
 
-  document.getElementById("productPublished").checked = true;
+
+  document.getElementById(
+    "productReviewCount"
+  ).value = "";
+
+
+  document.getElementById(
+    "productURL"
+  ).value = "";
+
+
+  document.getElementById(
+    "productAffiliateURL"
+  ).value = "";
+
+
+  document.getElementById(
+    "productImage"
+  ).value = "";
+
+
+  document.getElementById(
+    "productDeal"
+  ).checked = false;
+
+
+  document.getElementById(
+    "productTrending"
+  ).checked = false;
+
+
+  document.getElementById(
+    "productFeatured"
+  ).checked = false;
+
+
+  document.getElementById(
+    "productPublished"
+  ).checked = true;
+
 }
 
+
+/* ==========================================================
+   LOAD ADMIN PRODUCTS
+   ========================================================== */
 
 async function loadAdminProducts() {
 
   const container =
-    document.getElementById("adminProducts");
+    document.getElementById(
+      "adminProducts"
+    );
 
-  container.innerHTML = "Loading products...";
 
-  const { data, error } =
+  container.innerHTML =
+    "Loading products...";
+
+
+  const {
+    data,
+    error
+  } =
     await supabaseClient
       .from("products")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order(
+        "created_at",
+        {
+          ascending: false
+        }
+      );
+
 
   if (error) {
 
     container.innerHTML =
-      "Could not load products: " + error.message;
+      "Could not load products: " +
+      error.message;
 
     return;
+
   }
 
-  if (!data || data.length === 0) {
+
+  if (
+    !data ||
+    data.length === 0
+  ) {
 
     container.innerHTML =
       "<p>No products added yet.</p>";
 
     return;
+
   }
 
-  container.innerHTML = data.map(product => `
 
-    <div style="
-      border:1px solid #ddd;
-      padding:15px;
-      margin:10px 0;
-      border-radius:12px;
-    ">
+  container.innerHTML =
+    data
+      .map(
+        product => `
 
-      <strong>${product.name}</strong>
+          <div
+            style="
+              border:1px solid #ddd;
+              padding:15px;
+              margin:10px 0;
+              border-radius:12px;
+            "
+          >
 
-      <br>
+            <strong>
+              ${escapeHtml(
+                product.name
+              )}
+            </strong>
 
-      <small>
-        ${product.retailer || ""} ·
-        ₹${product.price || 0}
-      </small>
+            <br>
 
-      <br><br>
+            <small>
 
-      <button onclick="editProduct(${product.id})">
-        Edit
-      </button>
+              ${escapeHtml(
+                product.retailer || ""
+              )}
 
-      <button onclick="deleteProduct(${product.id})">
-        Delete
-      </button>
+              ·
 
-    </div>
+              ₹${product.price || 0}
 
-  `).join("");
+            </small>
+
+            <br><br>
+
+            <button
+              onclick="
+                editProduct(
+                  ${product.id}
+                )
+              "
+            >
+              Edit
+            </button>
+
+            <button
+              onclick="
+                deleteProduct(
+                  ${product.id}
+                )
+              "
+            >
+              Delete
+            </button>
+
+          </div>
+
+        `
+      )
+      .join("");
+
 }
 
 
-async function editProduct(id) {
+/* ==========================================================
+   EDIT PRODUCT
+   ========================================================== */
 
-  const { data, error } =
+async function editProduct(
+  id
+) {
+
+  const {
+    data,
+    error
+  } =
     await supabaseClient
       .from("products")
       .select("*")
-      .eq("id", id)
+      .eq(
+        "id",
+        id
+      )
       .single();
+
 
   if (error) {
 
-    alert("Could not load product.");
+    alert(
+      "Could not load product."
+    );
 
     return;
+
   }
 
-  document.getElementById("editProductId").value =
+
+  document.getElementById(
+    "editProductId"
+  ).value =
     data.id;
 
-  document.getElementById("productName").value =
+
+  document.getElementById(
+    "productName"
+  ).value =
     data.name || "";
 
-  document.getElementById("productDescription").value =
+
+  document.getElementById(
+    "productDescription"
+  ).value =
     data.description || "";
 
-  document.getElementById("productRetailer").value =
+
+  document.getElementById(
+    "productRetailer"
+  ).value =
     data.retailer || "";
 
-  document.getElementById("productCategory").value =
+
+  document.getElementById(
+    "productCategory"
+  ).value =
     data.category || "";
 
-  document.getElementById("productPrice").value =
+
+  document.getElementById(
+    "productPrice"
+  ).value =
     data.price || "";
 
-  document.getElementById("productOldPrice").value =
+
+  document.getElementById(
+    "productOldPrice"
+  ).value =
     data.old_price || "";
 
-  document.getElementById("productRating").value =
+
+  document.getElementById(
+    "productRating"
+  ).value =
     data.rating || "";
 
-  document.getElementById("productReviewCount").value =
+
+  document.getElementById(
+    "productReviewCount"
+  ).value =
     data.review_count || "";
 
-  document.getElementById("productURL").value =
+
+  document.getElementById(
+    "productURL"
+  ).value =
     data.product_url || "";
 
-  document.getElementById("productAffiliateURL").value =
+
+  document.getElementById(
+    "productAffiliateURL"
+  ).value =
     data.affiliate_url || "";
 
-  document.getElementById("productDeal").checked =
-    data.is_deal;
 
-  document.getElementById("productTrending").checked =
-    data.is_trending;
+  document.getElementById(
+    "productDeal"
+  ).checked =
+    !!data.is_deal;
 
-  document.getElementById("productFeatured").checked =
-    data.is_featured;
 
-  document.getElementById("productPublished").checked =
-    data.is_published;
+  document.getElementById(
+    "productTrending"
+  ).checked =
+    !!data.is_trending;
 
-  document.getElementById("productForm").style.display =
+
+  document.getElementById(
+    "productFeatured"
+  ).checked =
+    !!data.is_featured;
+
+
+  document.getElementById(
+    "productPublished"
+  ).checked =
+    !!data.is_published;
+
+
+  document.getElementById(
+    "productForm"
+  ).style.display =
     "block";
+
 }
 
 
-async function deleteProduct(id) {
+/* ==========================================================
+   DELETE PRODUCT
+   ========================================================== */
 
-  if (!confirm("Delete this product?")) {
+async function deleteProduct(
+  id
+) {
+
+  if (
+    !confirm(
+      "Delete this product?"
+    )
+  ) {
+
     return;
+
   }
 
-  const { error } =
+
+  const {
+    error
+  } =
     await supabaseClient
       .from("products")
       .delete()
-      .eq("id", id);
+      .eq(
+        "id",
+        id
+      );
+
 
   if (error) {
 
-    alert("Could not delete product: " + error.message);
+    alert(
+      "Could not delete product: " +
+      error.message
+    );
 
     return;
+
   }
 
+
   loadAdminProducts();
+
+
+  loadProductsFromSupabase();
+
 }
+
 </script>
-  
-  <!-- QEVRI ADMIN PANEL -->
-<div id="adminPanel" style="display:none;">
-  <div class="admin-overlay">
-    <div class="admin-box">
-
-      <div class="admin-header">
-        <div>
-          <h2>QEVRI Admin</h2>
-          <p>Manage your products</p>
-        </div>
-        <button onclick="closeAdmin()">✕</button>
-      </div>
-
-      <!-- LOGIN -->
-      <div id="adminLogin">
-        <h3>Admin Login</h3>
-
-        <input
-          type="email"
-          id="adminEmail"
-          placeholder="Admin email"
-        >
-
-        <input
-          type="password"
-          id="adminPassword"
-          placeholder="Password"
-        >
-
-        <button onclick="adminLogin()">Login</button>
-
-        <p id="loginMessage"></p>
-      </div>
-
-      <!-- DASHBOARD -->
-      <div id="adminDashboard" style="display:none;">
-
-        <div class="admin-actions">
-          <button onclick="showAddProduct()">＋ Add Product</button>
-          <button onclick="adminLogout()">Logout</button>
-        </div>
-
-        <div id="productForm" style="display:none;">
-
-          <h3>Add / Edit Product</h3>
-
-          <input type="hidden" id="editProductId">
-
-          <input id="productName" placeholder="Product name">
-
-          <textarea
-            id="productDescription"
-            placeholder="Product description"
-          ></textarea>
-
-          <input id="productRetailer" placeholder="Retailer">
-
-          <input id="productCategory" placeholder="Category">
-
-          <input
-            id="productPrice"
-            type="number"
-            placeholder="Price"
-          >
-
-          <input
-            id="productOldPrice"
-            type="number"
-            placeholder="Old price"
-          >
-
-          <input
-            id="productRating"
-            type="number"
-            step="0.1"
-            placeholder="Rating"
-          >
-
-          <input
-            id="productReviewCount"
-            type="number"
-            placeholder="Review count"
-          >
-
-          <input
-            id="productURL"
-            placeholder="Product URL"
-          >
-
-          <input
-            id="productAffiliateURL"
-            placeholder="Affiliate URL (optional)"
-          >
-
-          <label>Product Image</label>
-
-          <input
-            id="productImage"
-            type="file"
-            accept="image/*"
-          >
-
-          <label>
-            <input type="checkbox" id="productDeal">
-            Deal
-          </label>
-
-          <label>
-            <input type="checkbox" id="productTrending">
-            Trending
-          </label>
-
-          <label>
-            <input type="checkbox" id="productFeatured">
-            Featured
-          </label>
-
-          <label>
-            <input type="checkbox" id="productPublished" checked>
-            Published
-          </label>
-
-          <div class="form-buttons">
-            <button onclick="saveProduct()">Save Product</button>
-            <button onclick="cancelProductForm()">Cancel</button>
-          </div>
-
-          <p id="productMessage"></p>
-
-        </div>
-
-        <h3>Your Products</h3>
-
-        <div id="adminProducts">
-          Loading products...
-        </div>
-
-      </div>
-
-    </div>
-  </div>
-</div>
-  
-</body>
-
-</html>
