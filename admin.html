@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>QEVRI Admin</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -19,6 +18,7 @@
 
     body {
       margin: 0;
+      min-height: 100vh;
       font-family: Inter, Arial, sans-serif;
       color: #f5f5f7;
       background:
@@ -26,7 +26,6 @@
         radial-gradient(circle at 90% 20%, rgba(0, 210, 255, 0.15), transparent 28%),
         radial-gradient(circle at 50% 90%, rgba(255, 0, 128, 0.12), transparent 30%),
         #07070b;
-      min-height: 100vh;
       overflow-x: hidden;
     }
 
@@ -41,7 +40,7 @@
       filter: blur(80px);
       opacity: 0.22;
       pointer-events: none;
-      z-index: -1;
+      z-index: -2;
     }
 
     body::before {
@@ -78,7 +77,7 @@
       }
     }
 
-    /* Small moving stars */
+    /* Moving particles */
     .stars {
       position: fixed;
       inset: 0;
@@ -91,8 +90,9 @@
       position: absolute;
       width: 3px;
       height: 3px;
-      background: rgba(255,255,255,0.7);
       border-radius: 50%;
+      background: rgba(255, 255, 255, 0.7);
+      box-shadow: 0 0 12px rgba(255,255,255,0.35);
       animation: twinkle 4s ease-in-out infinite;
     }
 
@@ -150,6 +150,7 @@
     }
 
     .card {
+      position: relative;
       background: rgba(18, 18, 27, 0.82);
       border: 1px solid rgba(255,255,255,0.09);
       padding: 30px;
@@ -158,7 +159,21 @@
         0 25px 70px rgba(0,0,0,0.45),
         inset 0 1px 0 rgba(255,255,255,0.04);
       backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       margin-bottom: 24px;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(
+        135deg,
+        rgba(255,255,255,0.035),
+        transparent 45%
+      );
+      pointer-events: none;
     }
 
     .brand {
@@ -170,7 +185,12 @@
       margin: 0;
       font-size: 34px;
       letter-spacing: 4px;
-      background: linear-gradient(90deg, #ffffff, #a78bfa, #67e8f9);
+      background: linear-gradient(
+        90deg,
+        #ffffff,
+        #a78bfa,
+        #67e8f9
+      );
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -234,8 +254,9 @@
       resize: vertical;
     }
 
-    /* File picker */
+    /* Product image upload */
     .upload-box {
+      position: relative;
       margin-top: 8px;
       padding: 22px;
       border: 1px dashed rgba(167,139,250,0.45);
@@ -273,7 +294,11 @@
     }
 
     input[type="file"]::file-selector-button {
-      background: linear-gradient(135deg, #7c3aed, #4f46e5);
+      background: linear-gradient(
+        135deg,
+        #7c3aed,
+        #4f46e5
+      );
       color: white;
       border: none;
       padding: 9px 15px;
@@ -315,6 +340,13 @@
       background: rgba(255,255,255,0.08);
     }
 
+    .section-note {
+      font-size: 13px;
+      color: #71717a;
+      margin-top: 5px;
+    }
+
+    /* Buttons */
     button {
       margin-top: 20px;
       padding: 13px 18px;
@@ -333,12 +365,19 @@
     .primary {
       width: 100%;
       color: white;
-      background: linear-gradient(135deg, #7c3aed, #4f46e5, #0891b2);
-      box-shadow: 0 10px 30px rgba(79,70,229,0.25);
+      background: linear-gradient(
+        135deg,
+        #7c3aed,
+        #4f46e5,
+        #0891b2
+      );
+      box-shadow:
+        0 10px 30px rgba(79,70,229,0.25);
     }
 
     .primary:hover {
-      box-shadow: 0 15px 40px rgba(79,70,229,0.40);
+      box-shadow:
+        0 15px 40px rgba(79,70,229,0.40);
     }
 
     .secondary {
@@ -352,7 +391,7 @@
     }
 
     .hidden {
-      display: none;
+      display: none !important;
     }
 
     .message {
@@ -363,14 +402,10 @@
       color: #d4d4d8;
       display: none;
       border: 1px solid rgba(255,255,255,0.07);
+      line-height: 1.5;
     }
 
-    .section-note {
-      font-size: 13px;
-      color: #71717a;
-      margin-top: 5px;
-    }
-
+    /* Checkbox options */
     .checkbox-group {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -396,6 +431,7 @@
       accent-color: #8b5cf6;
     }
 
+    /* Admin header */
     .admin-header {
       display: flex;
       justify-content: space-between;
@@ -439,6 +475,7 @@
 
 <body>
 
+  <!-- Animated background -->
   <div class="stars">
     <span class="star"></span>
     <span class="star"></span>
@@ -447,6 +484,7 @@
     <span class="star"></span>
     <span class="star"></span>
   </div>
+
 
   <div class="container">
 
@@ -459,39 +497,66 @@
       </div>
 
       <label>Email</label>
+
       <input
         id="email"
         type="email"
         placeholder="Admin email"
+        autocomplete="username"
       >
 
+
       <label>Password</label>
+
       <input
         id="password"
         type="password"
         placeholder="Password"
+        autocomplete="current-password"
       >
 
-      <button class="primary" id="loginButton">
+
+      <button
+        class="primary"
+        id="loginButton"
+      >
         Login
       </button>
 
-      <div class="message" id="loginMessage"></div>
+
+      <div
+        class="message"
+        id="loginMessage"
+      ></div>
 
     </div>
 
 
-    <!-- ADMIN -->
-    <div class="card hidden" id="adminCard">
+    <!-- ADMIN HEADER -->
+    <div
+      class="card hidden"
+      id="adminCard"
+    >
 
       <div class="admin-header">
 
         <div>
-          <h1>QEVRI Product Admin</h1>
-          <div class="admin-status">● You are logged in</div>
+
+          <h1>
+            QEVRI Product Admin
+          </h1>
+
+          <div class="admin-status">
+            ● You are logged in
+          </div>
+
         </div>
 
-        <button class="secondary" id="logoutButton">
+
+        <button
+          class="secondary"
+          id="logoutButton"
+        >
           Logout
         </button>
 
@@ -501,38 +566,63 @@
 
 
     <!-- ADD PRODUCT -->
-    <div class="card hidden" id="productCard">
+    <div
+      class="card hidden"
+      id="productCard"
+    >
 
-      <h2>✨ Add Product</h2>
+      <h2>
+        ✨ Add Product
+      </h2>
 
-      <label>Product Name *</label>
+
+      <label>
+        Product Name *
+      </label>
+
       <input
         id="productName"
         type="text"
         placeholder="Enter product name"
       >
 
-      <label>Description</label>
+
+      <label>
+        Description
+      </label>
+
       <textarea
         id="description"
         placeholder="Write a short product description"
       ></textarea>
 
-      <label>Retailer *</label>
+
+      <label>
+        Retailer *
+      </label>
+
       <input
         id="retailer"
         type="text"
         placeholder="Amazon, Flipkart, Myntra..."
       >
 
-      <label>Category *</label>
+
+      <label>
+        Category *
+      </label>
+
       <input
         id="category"
         type="text"
         placeholder="Fashion, Electronics, Home..."
       >
 
-      <label>Product URL *</label>
+
+      <label>
+        Product URL *
+      </label>
+
       <input
         id="productUrl"
         type="url"
@@ -541,11 +631,15 @@
 
 
       <!-- PRODUCT IMAGE -->
-      <label>Product Image</label>
+      <label>
+        Product Image
+      </label>
 
       <div class="upload-box">
 
-        <div class="upload-icon">📷</div>
+        <div class="upload-icon">
+          📷
+        </div>
 
         <div class="upload-text">
           Upload product image
@@ -555,23 +649,38 @@
           Choose an image from your computer
         </div>
 
+
         <input
           id="productFile"
           type="file"
           accept="image/*"
         >
 
-        <div class="image-preview" id="imagePreview">
-          <img id="previewImage" alt="Product preview">
+
+        <div
+          class="image-preview"
+          id="imagePreview"
+        >
+
+          <img
+            id="previewImage"
+            alt="Product preview"
+          >
+
         </div>
 
       </div>
+
 
       <div class="or-divider">
         OR
       </div>
 
-      <label>Image URL</label>
+
+      <label>
+        Image URL
+      </label>
+
       <input
         id="imageUrl"
         type="url"
@@ -583,7 +692,10 @@
       </div>
 
 
-      <label>Affiliate URL</label>
+      <label>
+        Affiliate URL
+      </label>
+
       <input
         id="affiliateUrl"
         type="url"
@@ -591,7 +703,10 @@
       >
 
 
-      <label>Price</label>
+      <label>
+        Price
+      </label>
+
       <input
         id="price"
         type="number"
@@ -599,7 +714,11 @@
         placeholder="0.00"
       >
 
-      <label>Old Price</label>
+
+      <label>
+        Old Price
+      </label>
+
       <input
         id="oldPrice"
         type="number"
@@ -607,7 +726,11 @@
         placeholder="0.00"
       >
 
-      <label>Rating</label>
+
+      <label>
+        Rating
+      </label>
+
       <input
         id="rating"
         type="number"
@@ -617,7 +740,11 @@
         placeholder="0 - 5"
       >
 
-      <label>Review Count</label>
+
+      <label>
+        Review Count
+      </label>
+
       <input
         id="reviewCount"
         type="number"
@@ -628,33 +755,56 @@
       <div class="checkbox-group">
 
         <label class="checkbox-item">
-          <input id="isDeal" type="checkbox">
+          <input
+            id="isDeal"
+            type="checkbox"
+          >
           Show as Deal
         </label>
 
+
         <label class="checkbox-item">
-          <input id="isTrending" type="checkbox">
+          <input
+            id="isTrending"
+            type="checkbox"
+          >
           Show as Trending
         </label>
 
+
         <label class="checkbox-item">
-          <input id="isFeatured" type="checkbox">
+          <input
+            id="isFeatured"
+            type="checkbox"
+          >
           Show as Featured
         </label>
 
+
         <label class="checkbox-item">
-          <input id="isPublished" type="checkbox" checked>
+          <input
+            id="isPublished"
+            type="checkbox"
+            checked
+          >
           Published / Visible
         </label>
 
       </div>
 
 
-      <button class="primary" id="addProductButton">
+      <button
+        class="primary"
+        id="addProductButton"
+      >
         Add Product
       </button>
 
-      <div class="message" id="productMessage"></div>
+
+      <div
+        class="message"
+        id="productMessage"
+      ></div>
 
     </div>
 
@@ -663,14 +813,26 @@
 
   <script>
 
+    /* =========================================
+       SUPABASE CONFIGURATION
+       ========================================= */
+
     const SUPABASE_URL =
       "https://thijdkyjgzxnwwdzdyil.supabase.co";
 
+
     /*
       IMPORTANT:
-      Keep the SAME publishable key that is already
-      in your current admin.html file.
-      Do NOT use a secret/service-role key.
+
+      Put your EXISTING Supabase publishable key
+      between the quotation marks below.
+
+      It should start with:
+      sb_publishable_
+
+      DO NOT use:
+      sb_secret_
+      service_role
     */
 
     const SUPABASE_PUBLISHABLE_KEY =
@@ -683,6 +845,10 @@
         SUPABASE_PUBLISHABLE_KEY
       );
 
+
+    /* =========================================
+       ELEMENTS
+       ========================================= */
 
     const loginCard =
       document.getElementById("loginCard");
@@ -700,269 +866,127 @@
       document.getElementById("productMessage");
 
 
-    function showMessage(element, message) {
+    /* =========================================
+       MESSAGE
+       ========================================= */
+
+    function showMessage(
+      element,
+      message
+    ) {
 
       element.textContent = message;
+
       element.style.display = "block";
 
     }
 
 
-    /* IMAGE PREVIEW */
+    /* =========================================
+       IMAGE PREVIEW
+       ========================================= */
 
     document
       .getElementById("productFile")
-      .addEventListener("change", function () {
+      .addEventListener(
+        "change",
+        function () {
 
-        const file = this.files[0];
+          const file =
+            this.files[0];
 
-        const previewBox =
-          document.getElementById("imagePreview");
+          const previewBox =
+            document.getElementById(
+              "imagePreview"
+            );
 
-        const previewImage =
-          document.getElementById("previewImage");
+          const previewImage =
+            document.getElementById(
+              "previewImage"
+            );
 
-        if (!file) {
 
-          previewBox.style.display = "none";
-          previewImage.src = "";
+          if (!file) {
 
-          return;
+            previewBox.style.display =
+              "none";
 
-        }
+            previewImage.src = "";
 
-        const reader = new FileReader();
+            return;
 
-        reader.onload = function (event) {
+          }
 
-          previewImage.src = event.target.result;
-          previewBox.style.display = "block";
 
-        };
-
-        reader.readAsDataURL(file);
-
-      });
-
-
-    /* LOGIN */
-
-    document
-      .getElementById("loginButton")
-      .addEventListener("click", async function () {
-
-        const email =
-          document.getElementById("email").value.trim();
-
-        const password =
-          document.getElementById("password").value;
-
-
-        if (!email || !password) {
-
-          showMessage(
-            loginMessage,
-            "Please enter your email and password."
-          );
-
-          return;
-
-        }
-
-
-        showMessage(
-          loginMessage,
-          "Logging in..."
-        );
-
-
-        const { error } =
-          await supabaseClient.auth.signInWithPassword({
-
-            email: email,
-            password: password
-
-          });
-
-
-        if (error) {
-
-          showMessage(
-            loginMessage,
-            "Login failed: " + error.message
-          );
-
-          return;
-
-        }
-
-
-        loginCard.classList.add("hidden");
-
-        adminCard.classList.remove("hidden");
-
-        productCard.classList.remove("hidden");
-
-      });
-
-
-    /* LOGOUT */
-
-    document
-      .getElementById("logoutButton")
-      .addEventListener("click", async function () {
-
-        await supabaseClient.auth.signOut();
-
-        adminCard.classList.add("hidden");
-
-        productCard.classList.add("hidden");
-
-        loginCard.classList.remove("hidden");
-
-        document.getElementById("email").value = "";
-
-        document.getElementById("password").value = "";
-
-      });
-
-
-    /* ADD PRODUCT */
-
-    document
-      .getElementById("addProductButton")
-      .addEventListener("click", async function () {
-
-        showMessage(
-          productMessage,
-          "Adding product..."
-        );
-
-
-        const name =
-          document
-            .getElementById("productName")
-            .value
-            .trim();
-
-        const description =
-          document
-            .getElementById("description")
-            .value
-            .trim();
-
-        const retailer =
-          document
-            .getElementById("retailer")
-            .value
-            .trim();
-
-        const category =
-          document
-            .getElementById("category")
-            .value
-            .trim();
-
-        const productUrl =
-          document
-            .getElementById("productUrl")
-            .value
-            .trim();
-
-        const affiliateUrl =
-          document
-            .getElementById("affiliateUrl")
-            .value
-            .trim() || null;
-
-        const imageUrlInput =
-          document
-            .getElementById("imageUrl")
-            .value
-            .trim();
-
-        const file =
-          document
-            .getElementById("productFile")
-            .files[0];
-
-
-        /* REQUIRED FIELDS */
-
-        if (
-          !name ||
-          !retailer ||
-          !category ||
-          !productUrl
-        ) {
-
-          showMessage(
-            productMessage,
-            "Please fill all fields marked with *."
-          );
-
-          return;
-
-        }
-
-
-        /* IMAGE */
-
-        let finalImageUrl =
-          imageUrlInput || null;
-
-
-        /*
-          If a file is selected, upload it
-          to the existing product-images bucket.
-        */
-
-        if (file) {
-
-          showMessage(
-            productMessage,
-            "Uploading product image..."
-          );
-
-
-          const extension =
-            file.name
-              .split(".")
-              .pop()
-              .toLowerCase();
-
-
-          const uniqueName =
-            crypto.randomUUID() +
-            "." +
-            extension;
-
-
-          const filePath =
-            "products/" +
-            uniqueName;
-
-
-          const { error: uploadError } =
-            await supabaseClient.storage
-              .from("product-images")
-              .upload(
-                filePath,
-                file,
-                {
-                  cacheControl: "3600",
-                  upsert: false,
-                  contentType: file.type
-                }
-              );
-
-
-          if (uploadError) {
+          if (
+            !file.type.startsWith("image/")
+          ) {
 
             showMessage(
               productMessage,
-              "Image upload failed: " +
-              uploadError.message
+              "Please choose an image file."
+            );
+
+            this.value = "";
+
+            previewBox.style.display =
+              "none";
+
+            return;
+
+          }
+
+
+          const reader =
+            new FileReader();
+
+
+          reader.onload =
+            function (event) {
+
+              previewImage.src =
+                event.target.result;
+
+              previewBox.style.display =
+                "block";
+
+            };
+
+
+          reader.readAsDataURL(file);
+
+        }
+      );
+
+
+    /* =========================================
+       LOGIN
+       ========================================= */
+
+    document
+      .getElementById("loginButton")
+      .addEventListener(
+        "click",
+        async function () {
+
+          const email =
+            document
+              .getElementById("email")
+              .value
+              .trim();
+
+
+          const password =
+            document
+              .getElementById("password")
+              .value;
+
+
+          if (!email || !password) {
+
+            showMessage(
+              loginMessage,
+              "Please enter your email and password."
             );
 
             return;
@@ -970,141 +994,445 @@
           }
 
 
-          const { data: publicUrlData } =
-            supabaseClient.storage
-              .from("product-images")
-              .getPublicUrl(filePath);
+          showMessage(
+            loginMessage,
+            "Logging in..."
+          );
 
 
-          finalImageUrl =
-            publicUrlData.publicUrl;
+          const {
+            error
+          } =
+            await supabaseClient
+              .auth
+              .signInWithPassword({
+
+                email: email,
+
+                password: password
+
+              });
+
+
+          if (error) {
+
+            showMessage(
+              loginMessage,
+              "Login failed: " +
+              error.message
+            );
+
+            return;
+
+          }
+
+
+          loginCard.classList.add(
+            "hidden"
+          );
+
+          adminCard.classList.remove(
+            "hidden"
+          );
+
+          productCard.classList.remove(
+            "hidden"
+          );
 
         }
+      );
 
 
-        /* PRODUCT OBJECT */
+    /* =========================================
+       LOGOUT
+       ========================================= */
 
-        const product = {
+    document
+      .getElementById("logoutButton")
+      .addEventListener(
+        "click",
+        async function () {
 
-          name: name,
-
-          description: description,
-
-          retailer: retailer,
-
-          category: category,
-
-          product_url: productUrl,
-
-          affiliate_url: affiliateUrl,
-
-          image_url: finalImageUrl,
-
-          price:
-            document.getElementById("price").value
-              ? Number(
-                  document.getElementById("price").value
-                )
-              : null,
-
-          old_price:
-            document.getElementById("oldPrice").value
-              ? Number(
-                  document.getElementById("oldPrice").value
-                )
-              : null,
-
-          rating:
-            document.getElementById("rating").value
-              ? Number(
-                  document.getElementById("rating").value
-                )
-              : null,
-
-          review_count:
-            document.getElementById("reviewCount").value
-              ? Number(
-                  document.getElementById("reviewCount").value
-                )
-              : null,
-
-          is_deal:
-            document.getElementById("isDeal").checked,
-
-          is_trending:
-            document.getElementById("isTrending").checked,
-
-          is_featured:
-            document.getElementById("isFeatured").checked,
-
-          is_published:
-            document.getElementById("isPublished").checked
-
-        };
-
-
-        showMessage(
-          productMessage,
-          "Saving product..."
-        );
-
-
-        const { error } =
           await supabaseClient
-            .from("products")
-            .insert(product);
+            .auth
+            .signOut();
 
 
-        if (error) {
+          adminCard.classList.add(
+            "hidden"
+          );
+
+          productCard.classList.add(
+            "hidden"
+          );
+
+          loginCard.classList.remove(
+            "hidden"
+          );
+
+
+          document
+            .getElementById("email")
+            .value = "";
+
+
+          document
+            .getElementById("password")
+            .value = "";
+
+        }
+      );
+
+
+    /* =========================================
+       ADD PRODUCT
+       ========================================= */
+
+    document
+      .getElementById("addProductButton")
+      .addEventListener(
+        "click",
+        async function () {
 
           showMessage(
             productMessage,
-            "Product could not be added: " +
-            error.message
+            "Adding product..."
           );
 
-          return;
 
-        }
+          /* Product fields */
+
+          const name =
+            document
+              .getElementById("productName")
+              .value
+              .trim();
 
 
-        showMessage(
-          productMessage,
-          "✓ Product added successfully!"
-        );
+          const description =
+            document
+              .getElementById("description")
+              .value
+              .trim();
 
 
-        /* RESET FORM */
+          const retailer =
+            document
+              .getElementById("retailer")
+              .value
+              .trim();
 
-        document
-          .querySelectorAll(
-            "#productCard input, #productCard textarea"
-          )
-          .forEach(function(element) {
 
-            if (element.type === "checkbox") {
+          const category =
+            document
+              .getElementById("category")
+              .value
+              .trim();
 
-              element.checked =
-                element.id === "isPublished";
 
-            } else {
+          const productUrl =
+            document
+              .getElementById("productUrl")
+              .value
+              .trim();
 
-              element.value = "";
+
+          const affiliateUrl =
+            document
+              .getElementById("affiliateUrl")
+              .value
+              .trim() || null;
+
+
+          const imageUrlInput =
+            document
+              .getElementById("imageUrl")
+              .value
+              .trim();
+
+
+          const file =
+            document
+              .getElementById("productFile")
+              .files[0];
+
+
+          /* Required fields */
+
+          if (
+            !name ||
+            !retailer ||
+            !category ||
+            !productUrl
+          ) {
+
+            showMessage(
+              productMessage,
+              "Please fill all fields marked with *."
+            );
+
+            return;
+
+          }
+
+
+          /* =====================================
+             IMAGE HANDLING
+             ===================================== */
+
+          let finalImageUrl =
+            imageUrlInput || null;
+
+
+          /*
+            If a file was selected,
+            upload it to the existing
+            product-images bucket.
+          */
+
+          if (file) {
+
+            showMessage(
+              productMessage,
+              "Uploading product image..."
+            );
+
+
+            const extension =
+              file.name
+                .split(".")
+                .pop()
+                .toLowerCase();
+
+
+            const uniqueName =
+              crypto.randomUUID() +
+              "." +
+              extension;
+
+
+            const filePath =
+              "products/" +
+              uniqueName;
+
+
+            const {
+              error: uploadError
+            } =
+              await supabaseClient
+                .storage
+                .from("product-images")
+                .upload(
+                  filePath,
+                  file,
+                  {
+                    cacheControl: "3600",
+                    upsert: false,
+                    contentType: file.type
+                  }
+                );
+
+
+            if (uploadError) {
+
+              showMessage(
+                productMessage,
+                "Image upload failed: " +
+                uploadError.message
+              );
+
+              return;
 
             }
 
-          });
+
+            const {
+              data: publicUrlData
+            } =
+              supabaseClient
+                .storage
+                .from("product-images")
+                .getPublicUrl(
+                  filePath
+                );
 
 
-        document
-          .getElementById("imagePreview")
-          .style.display = "none";
+            finalImageUrl =
+              publicUrlData.publicUrl;
 
-        document
-          .getElementById("previewImage")
-          .src = "";
+          }
 
-      });
+
+          /* =====================================
+             PRODUCT OBJECT
+             ===================================== */
+
+          const product = {
+
+            name: name,
+
+            description: description,
+
+            retailer: retailer,
+
+            category: category,
+
+            product_url: productUrl,
+
+            affiliate_url: affiliateUrl,
+
+            image_url: finalImageUrl,
+
+            price:
+              document
+                .getElementById("price")
+                .value
+                ? Number(
+                    document
+                      .getElementById("price")
+                      .value
+                  )
+                : null,
+
+            old_price:
+              document
+                .getElementById("oldPrice")
+                .value
+                ? Number(
+                    document
+                      .getElementById("oldPrice")
+                      .value
+                  )
+                : null,
+
+            rating:
+              document
+                .getElementById("rating")
+                .value
+                ? Number(
+                    document
+                      .getElementById("rating")
+                      .value
+                  )
+                : null,
+
+            review_count:
+              document
+                .getElementById("reviewCount")
+                .value
+                ? Number(
+                    document
+                      .getElementById("reviewCount")
+                      .value
+                  )
+                : null,
+
+            is_deal:
+              document
+                .getElementById("isDeal")
+                .checked,
+
+            is_trending:
+              document
+                .getElementById("isTrending")
+                .checked,
+
+            is_featured:
+              document
+                .getElementById("isFeatured")
+                .checked,
+
+            is_published:
+              document
+                .getElementById("isPublished")
+                .checked
+
+          };
+
+
+          /* =====================================
+             SAVE PRODUCT
+             ===================================== */
+
+          showMessage(
+            productMessage,
+            "Saving product..."
+          );
+
+
+          const {
+            error
+          } =
+            await supabaseClient
+              .from("products")
+              .insert(product);
+
+
+          if (error) {
+
+            showMessage(
+              productMessage,
+              "Product could not be added: " +
+              error.message
+            );
+
+            return;
+
+          }
+
+
+          /* Success */
+
+          showMessage(
+            productMessage,
+            "✓ Product added successfully!"
+          );
+
+
+          /* =====================================
+             RESET FORM
+             ===================================== */
+
+          document
+            .querySelectorAll(
+              "#productCard input, #productCard textarea"
+            )
+            .forEach(
+              function(element) {
+
+                if (
+                  element.type === "checkbox"
+                ) {
+
+                  element.checked =
+                    element.id ===
+                    "isPublished";
+
+                } else {
+
+                  element.value = "";
+
+                }
+
+              }
+            );
+
+
+          document
+            .getElementById(
+              "imagePreview"
+            )
+            .style.display = "none";
+
+
+          document
+            .getElementById(
+              "previewImage"
+            )
+            .src = "";
+
+        }
+      );
 
   </script>
 
