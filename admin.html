@@ -3,77 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QEVRI Admin Login</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>QEVRI Admin Test</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
-      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f6f8;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #f5f6f8;
-      font-family: Arial, sans-serif;
+      margin: 0;
     }
 
-    .login-box {
-      width: 100%;
-      max-width: 400px;
+    .box {
       background: white;
+      width: 90%;
+      max-width: 400px;
       padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-    }
-
-    h1 {
-      margin: 0 0 8px;
-    }
-
-    p {
-      color: #666;
-      margin-bottom: 25px;
-    }
-
-    label {
-      display: block;
-      font-weight: bold;
-      margin: 15px 0 7px;
+      border-radius: 15px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.1);
     }
 
     input {
       width: 100%;
       padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
+      margin: 8px 0 15px;
+      box-sizing: border-box;
     }
 
     button {
       width: 100%;
-      margin-top: 22px;
       padding: 13px;
-      border: 0;
-      border-radius: 8px;
       background: #111;
       color: white;
-      font-size: 16px;
-      font-weight: bold;
+      border: 0;
+      border-radius: 8px;
       cursor: pointer;
+      font-size: 16px;
     }
 
-    button:disabled {
-      opacity: 0.6;
-    }
-
-    #message {
-      margin-top: 18px;
-      line-height: 1.5;
+    #status {
+      margin-top: 20px;
       font-weight: bold;
     }
   </style>
@@ -81,133 +52,47 @@
 
 <body>
 
-  <div class="login-box">
+<div class="box">
 
-    <h1>QEVRI Admin</h1>
+  <h1>QEVRI Admin</h1>
 
-    <p>Sign in to your QEVRI admin account.</p>
+  <p>Login test</p>
 
-    <label for="email">Email</label>
+  <input
+    id="email"
+    type="email"
+    placeholder="Email"
+  >
 
-    <input
-      id="email"
-      type="email"
-      placeholder="Admin email"
-      autocomplete="email"
-    >
+  <input
+    id="password"
+    type="password"
+    placeholder="Password"
+  >
 
-    <label for="password">Password</label>
+  <button onclick="testLogin()">
+    Login
+  </button>
 
-    <input
-      id="password"
-      type="password"
-      placeholder="Password"
-      autocomplete="current-password"
-    >
-
-    <button id="loginButton" type="button">
-      Login
-    </button>
-
-    <div id="message"></div>
-
+  <div id="status">
+    Page loaded successfully.
   </div>
 
-  <script>
-    const SUPABASE_URL =
-      "https://thijdkyjgzxnwwdzdyil.supabase.co";
+</div>
 
-    const SUPABASE_PUBLISHABLE_KEY =
-      "sb_publishable_fKXeJA4MtgPnPWHGKLb5Iw_FCTknjoo";
+<script>
 
-    const supabaseClient =
-      window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_PUBLISHABLE_KEY
-      );
+function testLogin() {
 
-    const emailInput =
-      document.getElementById("email");
+  const status = document.getElementById("status");
 
-    const passwordInput =
-      document.getElementById("password");
+  status.textContent = "Button is working!";
 
-    const loginButton =
-      document.getElementById("loginButton");
+  status.style.color = "green";
 
-    const message =
-      document.getElementById("message");
+}
 
-    loginButton.addEventListener("click", async function () {
-
-      const email = emailInput.value.trim();
-      const password = passwordInput.value;
-
-      if (!email || !password) {
-        message.style.color = "#b42318";
-        message.textContent =
-          "Please enter your email and password.";
-        return;
-      }
-
-      loginButton.disabled = true;
-      loginButton.textContent = "Logging in...";
-
-      message.style.color = "#666";
-      message.textContent = "Connecting to Supabase...";
-
-      try {
-
-        const { data, error } =
-          await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password
-          });
-
-        if (error) {
-          console.error(error);
-
-          message.style.color = "#b42318";
-          message.textContent =
-            "Login failed: " + error.message;
-
-          loginButton.disabled = false;
-          loginButton.textContent = "Login";
-          return;
-        }
-
-        if (data.session) {
-
-          message.style.color = "#16794b";
-          message.textContent =
-            "✅ Login successful! Supabase authentication is working.";
-
-          loginButton.textContent = "Logged In";
-
-        } else {
-
-          message.style.color = "#b42318";
-          message.textContent =
-            "Login completed, but no session was created.";
-
-          loginButton.disabled = false;
-          loginButton.textContent = "Login";
-        }
-
-      } catch (error) {
-
-        console.error(error);
-
-        message.style.color = "#b42318";
-        message.textContent =
-          "Connection error: " + error.message;
-
-        loginButton.disabled = false;
-        loginButton.textContent = "Login";
-      }
-
-    });
-  </script>
+</script>
 
 </body>
 </html>
