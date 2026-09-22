@@ -3,45 +3,86 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>QEVRI Admin</title>
 
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 30px;
-      background: #f7f7f7;
+    * {
+      box-sizing: border-box;
     }
 
-    h1 {
-      margin-bottom: 20px;
+    body {
+      margin: 0;
+      padding: 30px;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      color: #111;
     }
 
     .box {
+      max-width: 700px;
+      margin: 40px auto;
       background: white;
-      padding: 20px;
-      border-radius: 12px;
-      max-width: 900px;
-      margin: auto;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     }
 
-    input, textarea, select {
+    h1 {
+      margin-top: 0;
+      margin-bottom: 8px;
+    }
+
+    p {
+      color: #666;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    input,
+    textarea {
       width: 100%;
-      padding: 10px;
-      margin: 6px 0 14px;
-      box-sizing: border-box;
+      padding: 12px;
       border: 1px solid #ddd;
-      border-radius: 6px;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
     }
 
     button {
-      padding: 11px 18px;
-      border: 0;
-      border-radius: 6px;
-      cursor: pointer;
+      margin-top: 20px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
       background: #111;
       color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.85;
+    }
+
+    .logout {
+      background: #777;
+      margin-left: 8px;
+    }
+
+    .hidden {
+      display: none;
     }
 
     .message {
@@ -53,48 +94,470 @@
 
 <body>
 
-<div class="box">
+  <!-- =========================
+       LOGIN
+  ========================== -->
 
-  <h1>QEVRI Admin</h1>
+  <div class="box" id="loginBox">
 
-  <p>Add a product to QEVRI.</p>
+    <h1>QEVRI Admin</h1>
 
-  <label>Product Name</label>
-  <input id="name" type="text">
+    <p>Admin Login</p>
 
-  <label>Description</label>
-  <textarea id="description"></textarea>
+    <label>Email</label>
+    <input
+      type="email"
+      id="email"
+      placeholder="Enter admin email"
+    >
 
-  <label>Retailer</label>
-  <input id="retailer" type="text">
+    <label>Password</label>
+    <input
+      type="password"
+      id="password"
+      placeholder="Enter password"
+    >
 
-  <label>Product URL</label>
-  <input id="product_url" type="url">
+    <button onclick="login()">Login</button>
 
-  <label>Affiliate URL</label>
-  <input id="affiliate_url" type="url">
+    <div
+      class="message"
+      id="loginMessage">
+    </div>
 
-  <label>Image URL</label>
-  <input id="image_url" type="url">
+  </div>
 
-  <label>Category</label>
-  <input id="category" type="text">
 
-  <label>Price</label>
-  <input id="price" type="number">
+  <!-- =========================
+       ADMIN DASHBOARD
+  ========================== -->
 
-  <button onclick="addProduct()">Add Product</button>
+  <div
+    class="box hidden"
+    id="adminBox">
 
-  <div class="message" id="message"></div>
+    <h1>QEVRI Admin</h1>
 
-</div>
+    <p>Add a product to QEVRI.</p>
 
-<script>
-async function addProduct() {
-  document.getElementById("message").textContent =
-    "Admin page created. Supabase connection will be added next.";
-}
-</script>
+
+    <label>Product Name</label>
+    <input
+      type="text"
+      id="name"
+      placeholder="Product name"
+    >
+
+
+    <label>Description</label>
+    <textarea
+      id="description"
+      placeholder="Product description"
+    ></textarea>
+
+
+    <label>Retailer</label>
+    <input
+      type="text"
+      id="retailer"
+      placeholder="Amazon"
+    >
+
+
+    <label>Product URL</label>
+    <input
+      type="url"
+      id="product_url"
+      placeholder="https://..."
+    >
+
+
+    <label>Affiliate URL</label>
+    <input
+      type="url"
+      id="affiliate_url"
+      placeholder="https://..."
+    >
+
+
+    <label>Image URL</label>
+    <input
+      type="url"
+      id="image_url"
+      placeholder="https://..."
+    >
+
+
+    <label>Category</label>
+    <input
+      type="text"
+      id="category"
+      placeholder="Fashion"
+    >
+
+
+    <label>Price</label>
+    <input
+      type="number"
+      id="price"
+      step="0.01"
+      placeholder="999"
+    >
+
+
+    <button onclick="addProduct()">
+      Add Product
+    </button>
+
+    <button
+      class="logout"
+      onclick="logout()">
+      Logout
+    </button>
+
+
+    <div
+      class="message"
+      id="message">
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       SUPABASE CONNECTION
+  ========================== -->
+
+  <script>
+
+    /*
+      YOUR SUPABASE PROJECT
+    */
+
+    const SUPABASE_URL =
+      "https://thijdkyjgzxnwwdzdyil.supabase.co";
+
+
+    /*
+      IMPORTANT:
+
+      Replace ONLY the text below with
+      your Supabase PUBLISHABLE KEY.
+
+      It starts with:
+
+      sb_publishable_
+    */
+
+    const SUPABASE_PUBLISHABLE_KEY =
+      "sb_publishable_rTNzWNRC8zmx8J7KSJXviQ_1GgmmXQ6";
+
+
+    /*
+      CREATE SUPABASE CLIENT
+    */
+
+    const supabase =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+      );
+
+
+    /*
+      CHECK LOGIN WHEN PAGE OPENS
+    */
+
+    checkLogin();
+
+
+    async function checkLogin() {
+
+      const { data } =
+        await supabase.auth.getSession();
+
+      if (data.session) {
+
+        showAdmin();
+
+      }
+
+    }
+
+
+    /*
+      LOGIN
+    */
+
+    async function login() {
+
+      const email =
+        document.getElementById("email").value.trim();
+
+      const password =
+        document.getElementById("password").value;
+
+      const message =
+        document.getElementById("loginMessage");
+
+
+      if (!email || !password) {
+
+        message.textContent =
+          "Please enter your email and password.";
+
+        return;
+
+      }
+
+
+      message.textContent =
+        "Logging in...";
+
+
+      const { error } =
+        await supabase.auth.signInWithPassword({
+
+          email: email,
+
+          password: password
+
+        });
+
+
+      if (error) {
+
+        message.textContent =
+          "Login failed: " + error.message;
+
+        return;
+
+      }
+
+
+      message.textContent = "";
+
+      showAdmin();
+
+    }
+
+
+    /*
+      SHOW ADMIN DASHBOARD
+    */
+
+    function showAdmin() {
+
+      document
+        .getElementById("loginBox")
+        .classList
+        .add("hidden");
+
+
+      document
+        .getElementById("adminBox")
+        .classList
+        .remove("hidden");
+
+    }
+
+
+    /*
+      ADD PRODUCT
+    */
+
+    async function addProduct() {
+
+      const message =
+        document.getElementById("message");
+
+
+      const name =
+        document.getElementById("name")
+        .value
+        .trim();
+
+
+      const description =
+        document.getElementById("description")
+        .value
+        .trim();
+
+
+      const retailer =
+        document.getElementById("retailer")
+        .value
+        .trim();
+
+
+      const product_url =
+        document.getElementById("product_url")
+        .value
+        .trim();
+
+
+      const affiliate_url =
+        document.getElementById("affiliate_url")
+        .value
+        .trim();
+
+
+      const image_url =
+        document.getElementById("image_url")
+        .value
+        .trim();
+
+
+      const category =
+        document.getElementById("category")
+        .value
+        .trim();
+
+
+      const price =
+        document.getElementById("price")
+        .value;
+
+
+      /*
+        REQUIRED FIELDS
+      */
+
+      if (
+        !name ||
+        !retailer ||
+        !product_url ||
+        !category
+      ) {
+
+        message.textContent =
+          "Please fill Product Name, Retailer, Product URL and Category.";
+
+        return;
+
+      }
+
+
+      message.textContent =
+        "Adding product...";
+
+
+      /*
+        INSERT INTO SUPABASE
+      */
+
+      const { error } =
+
+        await supabase
+
+          .from("products")
+
+          .insert({
+
+            name: name,
+
+            description:
+              description || null,
+
+            retailer:
+              retailer,
+
+            product_url:
+              product_url,
+
+            affiliate_url:
+              affiliate_url || null,
+
+            image_url:
+              image_url || null,
+
+            category:
+              category,
+
+            price:
+              price
+                ? Number(price)
+                : null
+
+          });
+
+
+      /*
+        ERROR
+      */
+
+      if (error) {
+
+        console.error(error);
+
+        message.textContent =
+          "Error: " + error.message;
+
+        return;
+
+      }
+
+
+      /*
+        SUCCESS
+      */
+
+      message.textContent =
+        "✅ Product added successfully!";
+
+
+      /*
+        CLEAR FORM
+      */
+
+      document.getElementById("name").value = "";
+
+      document.getElementById("description").value = "";
+
+      document.getElementById("retailer").value = "";
+
+      document.getElementById("product_url").value = "";
+
+      document.getElementById("affiliate_url").value = "";
+
+      document.getElementById("image_url").value = "";
+
+      document.getElementById("category").value = "";
+
+      document.getElementById("price").value = "";
+
+    }
+
+
+    /*
+      LOGOUT
+    */
+
+    async function logout() {
+
+      await supabase.auth.signOut();
+
+
+      document
+        .getElementById("adminBox")
+        .classList
+        .add("hidden");
+
+
+      document
+        .getElementById("loginBox")
+        .classList
+        .remove("hidden");
+
+
+      document
+        .getElementById("loginMessage")
+        .textContent =
+        "Logged out.";
+
+    }
+
+  </script>
 
 </body>
 </html>
