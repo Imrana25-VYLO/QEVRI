@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QEVRI Admin</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 30px;
+      background: #f7f7f7;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 900px;
+      margin: auto;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0 14px;
+      box-sizing: border-box;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: 11px 18px;
+      border: 0;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #111;
+      color: white;
+    }
+
+    .message {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+
+  <h1>QEVRI Admin</h1>
+
+  <p>Add a product to QEVRI.</p>
+
+  <label>Product Name</label>
+  <input id="name" type="text">
+
+  <label>Description</label>
+  <textarea id="description"></textarea>
+
+  <label>Retailer</label>
+  <input id="retailer" type="text">
+
+  <label>Product URL</label>
+  <input id="product_url" type="url">
+
+  <label>Affiliate URL</label>
+  <input id="affiliate_url" type="url">
+
+  <label>Image URL</label>
+  <input id="image_url" type="url">
+
+  <label>Category</label>
+  <input id="category" type="text">
+
+  <label>Price</label>
+  <input id="price" type="number">
+
+  <button onclick="addProduct()">Add Product</button>
+
+  <div class="message" id="message"></div>
+
+</div>
+
+<script>
+async function addProduct() {
+  document.getElementById("message").textContent =
+    "Admin page created. Supabase connection will be added next.";
+}
+</script>
+
+</body>
+</html>
